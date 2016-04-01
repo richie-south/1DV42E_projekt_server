@@ -18,7 +18,10 @@
   },
   "homepage": "https://github.com/rs222kn/1DV42E_projekt_server#readme",
   "dependencies": {
+    "body-parser": "^1.15.0",
     "co": "^4.6.0",
-    "mongoose": "^4.4.10"
+    "express": "^4.13.4",
+    "mongoose": "^4.4.10",
+    "path": "^0.12.7"
   }
 }

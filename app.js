@@ -1,28 +1,36 @@
 'use strict';
+const myMock = require('./myMock.js'); // TODO: remove when not needed
+
 const userDAL = require('./models/DAL/dbHelper.js');
-const db = require('./models/DAL/dbDAL.js');
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
+
+const app = express();
+const port = 3334;
 userDAL();
 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-const mockData = () => {
-    db.createNewPlayerWithCard('bajs millan fb:id', 'http://i.imgur.com/BmgjTCh.jpg', 'millan', 'drake')
-        .then(result => console.log(result))
-        .catch(e => console.log('Error', e));
-};
+app.use('/', require('./routes/user.js'));
 
-const getMockUserData = () => {
-    db.getUserByFbId('bajs millan fb:id')
-        .then(result => console.log(result))
-        .catch(e => console.log(e));
+app.use(function(req, res, next) {
+  res.status(404).send('404');
+});
 
-};
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).send('500');
+});
 
-const getMockAllCards = () => {
-    db.getAllCards()
-        .then(result => console.log(result))
-        .catch(e => console.log(e));
-};
+app.all('/', function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
 
-mockData();
-getMockUserData();
-getMockAllCards();
+const server = app.listen(port, function() {
+    console.log('Listening on port %d', server.address().port);
+});

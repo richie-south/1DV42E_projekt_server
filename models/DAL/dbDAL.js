@@ -85,7 +85,7 @@ exports.createNewCard = createNewCardSave;
 const getUserByFbId = (fbId) => {
     return new Promise((resolve, reject) => {
         User
-            .find({ fbId : fbId })
+            .findOne({ fbId : fbId })
             .exec()
             .then(doc => resolve(doc))
             .catch(e => reject(e));
@@ -96,16 +96,21 @@ exports.getUserByFbId = getUserByFbId;
 
 /**
  * [gets all cards for user]
- * @param  {[string]} userId [id of user]
+ * @param  {[string]} fbId [fbid of user]
  * @return {[array]}        [array of all user cards]
  */
-const getCardsByCreatorId = (userId) => {
+const getCardsByCreatorId = (fbId) => {
     return new Promise((resolve, reject) => {
-        Card
-            .find({ _creator: userId })
-            .exec()
-            .then(doc => resolve(doc))
-            .then(doc => reject(doc));
+        co(function* (){
+            const user = yield User
+                    .findOne({ fbId: fbId})
+                    .select('_id')
+                    .exec();
+            return Card.find({ _creator: user._id })
+                        .exec();
+        })
+        .then(result => resolve(result))
+        .catch(e => reject(e));
     });
 };
 
