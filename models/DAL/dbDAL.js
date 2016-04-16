@@ -44,7 +44,7 @@ const createNewPlayerWithCard = (fbId, fbProfileImg, firstName, lastName) => {
             const myUser = createNewUser(fbId, fbProfileImg, firstName, lastName);
             const myUserDoc = yield myUser.save();
 
-            const myCard = createNewCard(myUserDoc._id, myUserDoc.name, myUserDoc.fbProfileImg);
+            const myCard = createNewCard(myUserDoc._id, firstName, myUserDoc.fbProfileImg);
             const myCardDoc = yield myCard.save();
 
             myUser.cards.push(myCard);
@@ -116,8 +116,22 @@ const getCardsByCreatorId = (fbId) => {
 
 exports.getCardsByCreatorId = getCardsByCreatorId;
 
+const getAllUsers = (fbId) => {
+    return new Promise((resolve, reject) => {
+        User.find({}, function(err, users) {
+                if(err){
+                    reject(err);
+                }
+                resolve(users);
+            });
+    });
+};
+
+exports.getAllUsers = getAllUsers;
+
+
 /**
- * [retrives all cards in mongodb]
+ * [retrives all cards in mongodb, for development purpoes only]
  * @return {[array]} [all cards in array]
  */
 const getAllCards = () => {
