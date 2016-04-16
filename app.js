@@ -6,9 +6,17 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const path = require('path');
-const jwt    = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const config = require('./config/config.js');
+const Rx = require('rx');
+const validation = require('./models/jsonValidation.js');
 
+var env = process.env.NODE_ENV || 'development';
+if (env === 'development') {
+    const clear = require('clear');
+    clear();
+    clear();
+}
 
 const app = express();
 const port = 3334;
@@ -44,26 +52,30 @@ const io = require('socket.io').listen(app.listen(port, function(){
     console.log('Listening on port ', port);
 }), { log: false, origins: '*:*' });
 
-const lobby = require('./socketRoutes/lobby.js');
+const Lobby = require('./socketRoutes/lobby.js');
+const lobby = new Lobby(io);
 
 io.sockets.on('connection', function (socket) {
 
-    socket.on('room', function(data) {
-        switch (data.room) {
-            case 'lobby':
-                    lobby.onLobbyJoin(data);
-                    socket.join(data.room);
-                break;
-            default:
-                return;
-        }
+    const roomStream = Rx.Observable.fromEvent(socket, 'room');
+
+    const joinLobbyStream = roomStream
+        .filter(ev => validation.joinValidation(ev))
+        .filter(ev => ev.room === 'lobby' && ev.join);
+
+    const leavLobbyStream = roomStream
+        .filter(ev => validation.joinValidation(ev))
+        .filter(ev => ev.room === 'lobby' && !ev.join);
+
+    joinLobbyStream.subscribe(function(data) {
+        console.log(data);
+        socket.join(data.room);
+        lobby.onLobbyJoin(data.card);
     });
 
-    //socket.on('main', require('./socketRoutes/main.js'));
-
-    //socket.on('lobby', );
+    leavLobbyStream.subscribe(function(data) {
+        console.log(data);
+        socket.leave('lobby');
+        lobby.onLobbyLeave(data.card);
+    });
 });
-
-/*const sendLobbyMessage = () => {
-    io.sockets.in('lobby').emit();
-};*/
