@@ -102,7 +102,8 @@ module.exports = class {
     getIndexOfCardInLobby(array, cardId){
         return array
             .map((c, index) => {
-        		if(c === cardId){
+                console.log('==================');
+        		if(c._id.toString() === cardId.toString()){
         			return index;
         		}
         	})
