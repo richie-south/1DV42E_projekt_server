@@ -68,10 +68,15 @@ io.sockets.on('connection', function (socket) {
         .filter(ev => validation.joinValidation(ev))
         .filter(ev => ev.add);
 
-    const leavLobbyStream = lobbyStream
+    const removeLobbyCardStream = lobbyStream
         .filter(ev => typeof ev !== 'string')
         .filter(ev => validation.joinValidation(ev))
         .filter(ev => !ev.add);
+
+    const leaveLobby = lobbyStream
+        .filter(ev => typeof ev !== 'string')
+        .filter(ev => !ev.hasOwnProperty('leave') && ev.leave)
+        .filter(ev => !ev.hasOwnProperty('fbId'));
 
     joinLobbyStream.subscribe(function(data) {
         console.log('joinging lobby');
@@ -82,14 +87,16 @@ io.sockets.on('connection', function (socket) {
 
     joinLobbyAddCardStream.subscribe(function(data) {
         console.log('add card to lobby');
-        console.log(data);
         lobby.onLobbyAddCard(data.card);
     });
 
-    leavLobbyStream.subscribe(function(data) {
+    removeLobbyCardStream.subscribe(function(data) {
         console.log('remove card from lobby');
-        console.log(data);
-        //socket.leave('lobby');
         lobby.onRemoveCard(data.card);
+    });
+
+    leaveLobby.subscribe(function(data){
+        console.log('leaving lobby');
+        lobby.onLobbyLeave(data.fbId);
     });
 });
