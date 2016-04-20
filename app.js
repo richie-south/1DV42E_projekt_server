@@ -58,24 +58,38 @@ const lobby = new Lobby(io);
 io.sockets.on('connection', function (socket) {
 
     const roomStream = Rx.Observable.fromEvent(socket, 'room');
+    const lobbyStream = Rx.Observable.fromEvent(socket, 'lobby');
 
     const joinLobbyStream = roomStream
-        .filter(ev => validation.joinValidation(ev))
-        .filter(ev => ev.room === 'lobby' && ev.join);
+        .filter(ev => ev === 'lobby');
 
-    const leavLobbyStream = roomStream
+    const joinLobbyAddCardStream = lobbyStream
+        .filter(ev => typeof ev !== 'string')
         .filter(ev => validation.joinValidation(ev))
-        .filter(ev => ev.room === 'lobby' && !ev.join);
+        .filter(ev => ev.add);
+
+    const leavLobbyStream = lobbyStream
+        .filter(ev => typeof ev !== 'string')
+        .filter(ev => validation.joinValidation(ev))
+        .filter(ev => !ev.add);
 
     joinLobbyStream.subscribe(function(data) {
+        console.log('joinging lobby');
         console.log(data);
-        socket.join(data.room);
-        lobby.onLobbyJoin(data.card);
+        socket.join(data);
+        lobby.onLobbyJoin();
+    });
+
+    joinLobbyAddCardStream.subscribe(function(data) {
+        console.log('add card to lobby');
+        console.log(data);
+        lobby.onLobbyAddCard(data.card);
     });
 
     leavLobbyStream.subscribe(function(data) {
+        console.log('remove card from lobby');
         console.log(data);
-        socket.leave('lobby');
-        lobby.onLobbyLeave(data.card);
+        //socket.leave('lobby');
+        lobby.onRemoveCard(data.card);
     });
 });
