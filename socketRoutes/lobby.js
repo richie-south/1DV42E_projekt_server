@@ -4,38 +4,20 @@ module.exports = class {
     constructor(io) {
         this.io = io;
         this.lobby = [];
-        this.resetLobby();
-    }
-
-    resetLobby(){
-        this.lobby = [
-            { backgroundCardImg: 'defaultCardImg',
-                stats:
-                 { lvl: 0,
-                   xp: 0,
-                   attack: 40,
-                   block: 30,
-                   heal: 20,
-                   attackBoost: 10,
-                   healBoost: 0,
-                   blockBoost: 0 },
-                pastUsers: [],
-                createdAt: new Date(),
-                __v: 0,
-                avatar: 'en bild',
-                name: 'Super kalle',
-                _creator: 'kalles_id',
-                _id: 'kalles_kort_id' }
-        ];
     }
 
     emitLobby() {
         this.io.sockets.to('lobby').emit('update', this.lobby);
     }
 
-    onLobbyJoin(card) {
+    onLobbyAddCard(card) {
         this.onAddCardToLoby(card);
         this.emitLobby();
+    }
+
+    onLobbyJoin() {
+        this.emitLobby();
+        console.log(this.lobby);
     }
 
     onAddCardToLoby(card){
@@ -43,11 +25,21 @@ module.exports = class {
     }
 
     onLobbyLeave(card) {
+
+        this.emitLobby();
+        //console.log(this.lobby);
+    }
+
+    onRemoveCard(card){
+        this.removeCard(card._id);
+        this.emitLobby();
+    }
+
+    removeCard(id){
         this.lobby.map((c, index) => {
-            if(c._id === card._id){
+            if(c._id === id){
                 this.lobby.splice(index, 1);
             }
         });
-        this.emitLobby();
     }
 };
