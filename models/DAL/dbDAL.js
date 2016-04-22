@@ -1,5 +1,5 @@
 'use strict';
-
+// TODO: split file in three (dbCard, dbUser, dbDAL)
 const User = require('./user.js');
 const Card = require('./card.js');
 const co = require('co');
@@ -94,7 +94,47 @@ const getUserByFbId = (fbId) => {
 
 exports.getUserByFbId = getUserByFbId;
 
+const getAllUsers = () => {
+    return new Promise((resolve, reject) => {
+        User.find({}, function(err, users) {
+                if(err){
+                    reject(err);
+                }
+                resolve(users);
+            });
+    });
+};
+
+exports.getAllUsers = getAllUsers;
+
 /**
+ * [retrives all cards in mongodb, for development purpoes only]
+ * @return {[array]} [all cards in array]
+ */
+const getAllCards = () => {
+    return new Promise((resolve, reject) => {
+        Card
+            .find({})
+            .then(doc => resolve(doc))
+            .catch(e => reject(e));
+    });
+};
+
+exports.getAllCards = getAllCards;
+
+const getCardByCardId = (id) => {
+    return new Promise((resolve, reject) => {
+        Card
+            .findById(id)
+            .then(card => resolve(card))
+            .catch(e => reject(e));
+    });
+};
+
+exports.getCardByCardId = getCardByCardId;
+
+
+/** DEPRICATED
  * [gets all cards for user]
  * @param  {[string]} fbId [fbid of user]
  * @return {[array]}        [array of all user cards]
@@ -114,33 +154,75 @@ const getCardsByCreatorId = (fbId) => {
     });
 };
 
-exports.getCardsByCreatorId = getCardsByCreatorId;
-
-const getAllUsers = (fbId) => {
-    return new Promise((resolve, reject) => {
-        User.find({}, function(err, users) {
-                if(err){
-                    reject(err);
-                }
-                resolve(users);
-            });
-    });
-};
-
-exports.getAllUsers = getAllUsers;
-
 
 /**
- * [retrives all cards in mongodb, for development purpoes only]
- * @return {[array]} [all cards in array]
+ * [gets all cards owned by user]
+ * @param  {[string]} fbId [facebook id of a user]
+ * @return {[array]}      [array of cards id]
  */
-const getAllCards = () => {
-    return new Promise((resolve, reject) => {
-        Card
-            .find({})
-            .then(doc => resolve(doc))
-            .catch(e => reject(e));
+const getUserCardsIdByFbId = (fbId) => {
+    return new Promise(function(resolve, reject) {
+        co(function* (){
+            const user = yield User
+                    .findOne({ fbId: fbId})
+                    .select({ cards: 1 });
+            return user.cards;
+        })
+        .then((cards) => {
+            resolve(cards);
+        })
+        .catch(e => reject(e));
     });
 };
 
-exports.getAllCards = getAllCards;
+const getUserCardsByFbId = (fbId) => {
+    return new Promise(function(resolve, reject) {
+        co(function* (){
+            const cardIds = yield getUserCardsIdByFbId(fbId);
+            return Card.find({
+                '_id': { $in: cardIds}
+            });
+        })
+        .then((cards) => {
+            resolve(cards);
+        })
+        .catch(e => reject(e));
+    });
+};
+
+exports.getCardsByCreatorId = getUserCardsByFbId;
+
+const sendCardFromUserToUser = (userOneFbId, cardId, userTwoFbId) => {
+    return new Promise((resolve, reject) => {
+        co(function* (){
+            console.log('addade kort');
+            const userA = yield getUserByFbId(userOneFbId);
+            const userB = yield getUserByFbId(userTwoFbId);
+
+            const userACards = yield getUserCardsIdByFbId(userA.fbId);
+            const cardIdToSend = userACards.filter((card) => {
+                if(card.toString() === cardId){
+                    return card;
+                }
+            })[0];
+            if(cardIdToSend === undefined){
+                throw 'cardId dont belong to user';
+            }
+
+            const u = yield User.findOneAndUpdate(
+                    { fbId: userOneFbId },
+                    { $pull: { cards: cardIdToSend } });
+
+            u.save();
+            const cardToSend = yield getCardByCardId(cardIdToSend);
+            userB.cards.push(cardToSend);
+            return userB.save();
+
+        })
+        .then(result => {
+            resolve(result);
+        }).catch(e => reject(e));
+    });
+};
+
+exports.sendCardFromUserToUser = sendCardFromUserToUser;
