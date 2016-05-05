@@ -1,14 +1,27 @@
 'use strict';
 const db = require('../models/DAL/dbDAL.js');
+const dbUser = require('../models/DAL/dbUser.js');
+const dbCard = require('../models/DAL/dbCard.js');
+const dbDAL = require('../models/DAL/dbDAL.js');
 
-module.exports = class {
+const lobby = class {
     constructor(io) {
         this.io = io;
-        this.lobby = [];
+    }
+
+    // ads mock card to lobby
+    mockLobby(){
+        dbUser.getUserByFbId('FBIDIzabella1')
+            .then(user => dbCard.getCardByCardId(user.cards[0]))
+            .then(dbDAL.Lobby.addCard)
+            .catch(e => console.log(e));
     }
 
     emitLobby() {
-        this.io.sockets.to('lobby').emit('update', this.lobby);
+        return dbDAL.Lobby.getAllCards()
+            .then(cards => cards.map(card => card.card))
+            .then(cards => this.io.sockets.to('lobby').emit('update', cards))
+            .catch(e => console.log(e));
     }
 
     /**
@@ -31,12 +44,11 @@ module.exports = class {
      * @param  {[object]} card [card object]
      */
     onAddCardToLobby(card){
-        db.getCardByCardId(card._id)
-            .then((card) => {
-                this.lobby.push(card);
-                this.emitLobby();
-            })
-            .catch((e) =>
+        return dbCard.getCardByCardId(card._id)
+            .then(card =>
+                dbDAL.Lobby.addCard(card))
+            .then(this.emitLobby.bind(this))
+            .catch(e =>
                 console.log('Could not add to lobby: ', e));
     }
 
@@ -45,18 +57,13 @@ module.exports = class {
      * @param  {[string]} fbId [facebook user id]
      */
     onLobbyLeave(fbId) {
-        db.getUserByFbId(fbId)
+        return dbUser.getUserByFbId(fbId)
             .then(user => db.getCardsByCreatorId(user.fbId))
             .then(cards => {
-                return cards.map(card => this.getIndexOfCardInLobby(this.lobby, card._id))
-                .filter(i => i !== undefined);
+                return Promise.all(cards.map((card) =>
+                    this.removeFromLobby(card._id)));
             })
-            .then(lobbyCardIds => {
-                lobbyCardIds.forEach(id => {
-                    this.removeFromLobby(id);
-                });
-                this.emitLobby();
-            })
+            .then(this.emitLobby.bind(this))
             .catch((e) =>
                 console.log('Could not remove alla cards from lobby: ', e));
     }
@@ -66,23 +73,11 @@ module.exports = class {
      * @param  {[object]} card [card object]
      */
     onRemoveCard(card){
-        db.getCardByCardId(card._id)
-            .then((card) => {
-                this.removeCard(card._id);
-                this.emitLobby();
-            })
+        return dbCard.getCardByCardId(card._id)
+            .then((card) => this.removeFromLobby(card._id))
+            .then(this.emitLobby.bind(this))
             .catch((e) =>
                 console.log('Could not remove card from lobby: ', e));
-    }
-
-    /**
-     * [removes card from lobby]
-     * @param  {[type]} cardId [description]
-     * @return {[type]}        [description]
-     */
-    removeCard(cardId){
-        const index = this.getIndexOfCardInLobby(this.lobby, cardId);
-        this.removeFromLobby(this.lobby, index);
     }
 
     /**
@@ -90,23 +85,10 @@ module.exports = class {
      * @param  {[int]} index [index of item to remove]
      * @param  {[array]} array [array to remove item in]
      */
-    removeFromLobby(array, index){
-        array.splice(index, 1);
+    removeFromLobby(id){
+        return dbDAL.Lobby.removeCard(id);
     }
 
-    /**
-     * [gets index of item in array]
-     * @param  {[string]} cardId [id of card]
-     * @return {[int]}        [index of item in array]
-     */
-    getIndexOfCardInLobby(array, cardId){
-        return array
-            .map((c, index) => {
-                console.log('==================');
-        		if(c._id.toString() === cardId.toString()){
-        			return index;
-        		}
-        	})
-            .filter(i => i !== undefined)[0];
-    }
 };
+
+module.exports = lobby;
