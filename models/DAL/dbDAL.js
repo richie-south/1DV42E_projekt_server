@@ -4,6 +4,7 @@ const User = require('./user.js');
 const Card = require('./card.js');
 const dbUser = require('./dbUser.js');
 const dbCard = require('./dbCard.js');
+const Lobby = require('./dbLobby.js');
 const co = require('co');
 
 /**
@@ -113,6 +114,7 @@ const sendCardFromUserToUser = (userOneFbId, cardId, userTwoFbId) => {
 };
 
 module.exports = {
+    Lobby,
     createNewPlayerWithCard,
     getCardsByCreatorId,
     getUserCardsByFbId,
