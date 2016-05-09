@@ -2,7 +2,8 @@
 
 const Card = require('./card.js');
 const co = require('co');
-
+const Colors = require('../color.js');
+const colors = new Colors();
 /**
  * [crates new card model for mongodb]
  * @param  {[string]} creatorId [id of creator of card]
@@ -14,7 +15,8 @@ const createNewCard = (creatorId, name, avatar) => {
     return new Card({
         _creator: creatorId,
         name,
-        avatar
+        avatar,
+        backgroundCardImg: colors.getRandomColor()
     });
 };
 
