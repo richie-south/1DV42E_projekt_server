@@ -6,7 +6,7 @@ const cardSchema = mongoose.Schema({
     _creator : { type: String, ref: 'User' },
     name: { type: String, required: true },
     avatar: { type: String, required: true },
-    backgroundCardImg: { type: String, default: 'defaultCardImg' },
+    backgroundCardImg: { type: String, required: true },
     stats: {
         lvl: { type: Number, min: 0, max: 30, default: 0},
         xp: { type: Number, default: 0},
