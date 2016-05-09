@@ -8,8 +8,15 @@ const joinValidation = (a) => {
     if(!a.card.hasOwnProperty('avatar')){ throw 'missing avatar'; }
     if(!a.card.hasOwnProperty('stats')){ throw 'missing stats'; }
     if(!a.card.hasOwnProperty('_creator')){ throw 'missing _creator'; }
-    console.log('valid');
     return true;
 };
 
 exports.joinValidation = joinValidation;
+
+const joinLobbyValidation = (a) => {
+    if(!a.hasOwnProperty('room')) { throw ''; }
+    if(!a.hasOwnProperty('fbId')) { throw ''; }
+    return true;
+};
+
+exports.joinLobbyValidation = joinLobbyValidation;
