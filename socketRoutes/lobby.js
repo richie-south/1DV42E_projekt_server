@@ -3,6 +3,7 @@ const db = require('../models/DAL/dbDAL.js');
 const dbUser = require('../models/DAL/dbUser.js');
 const dbCard = require('../models/DAL/dbCard.js');
 const dbDAL = require('../models/DAL/dbDAL.js');
+const co = require('co');
 
 const lobby = class {
     constructor(io) {
@@ -35,7 +36,38 @@ const lobby = class {
     /**
      * [emits lobby if someone joins it]
      */
-    onLobbyJoin() {
+    onLobbyJoin(fbId, socketId) {
+
+        /*co(function* (){
+            const myCards = yield dbUser.getUserCardsByFbId();
+            const lobbyCards = yield dbDAL.Lobby.getAllCards();
+
+            lobbyCards.filter(card => {
+                if(card.card._id)
+            })
+
+        })
+        .then((cards) => {
+
+        })
+        .catch(e => console.log(e));
+
+
+
+        dbUser.getUserCardsByFbId()
+            .then(cards =>
+                dbDAL.Lobby.getAllCards())
+            .then()
+            .catch(e => console.log(e));
+
+        dbDAL.Lobby.getAllCards()
+            .then(result => {
+                result.filter(card => {
+                    console.log(card);
+                });
+            })
+            .catch(e => console.log(e));
+            */
         this.emitLobby();
     }
 
