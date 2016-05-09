@@ -42,6 +42,10 @@ const getSpecificCard = () => {
     // TODO: implement this function
 };
 
+const getCardById = (id) => {
+    return Lobby.findOne({ 'card._id': id}).exec();
+};
+
 module.exports = {
     removeCard,
     addCard,
