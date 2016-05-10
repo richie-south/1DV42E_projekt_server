@@ -33,16 +33,16 @@ router.route('/user/create')
 router.route('/user/:fbid')
     .get((req, res) => {
         db.getUserByFbId(req.params.fbid)
-            .then(result => {console.log(result); res.json(result); })
+            .then(result => res.json(result))
             .catch(e => res.status(404).send('404'));
     });
 
 // get user cards
 router.route('/user/cards/:fbid')
     .get((req, res) => {
-        db.getCardsByCreatorId(req.params.fbid)
+        db.getUserCardsByFbId(req.params.fbid)
             .then(result => {
-                console.log(result);
+                //console.log(result);
                 res.json(result);
             })
             .catch(e => res.status(404).send('404'));
