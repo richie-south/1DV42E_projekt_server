@@ -62,12 +62,46 @@ const getAllCards = () => {
  * @return {[object]}    [object of card in lobby]
  */
 const getCardById = (id) => {
-    return Lobby.findOne({ 'card._id': id}).exec();
+    // would like to use simpler form and get data dirr from mongoDb
+    // return Lobby.findOne({ 'card._id': id}).exec();
+    return new Promise(function(resolve, reject) {
+        co(function* (){
+            const allCards = yield getAllCards();
+
+            return allCards
+                .filter(lobbyCard => {
+                    if(lobbyCard.card._id.toString() === id.toString()){
+                        return lobbyCard;
+                    }
+                })[0];
+        })
+        .then(doc => resolve(doc))
+        .catch(e => reject(e));
+    });
+};
+
+/**
+ * [updates socket id property of cards in lobby]
+ * @param  {[string]} cardId   [id of a card]
+ * @param  {[string]} socketId [new socket id to update card to]
+ * @return {[promise]}         [resolves to updated information]
+ */
+const updateSocketIdOnCard = (cardId, socketId) => {
+    return new Promise(function(resolve, reject) {
+        co(function* (){
+            const card = yield getCardById(cardId);
+            return Lobby.update({ _id: card._id }, { 'card.socketId': socketId })
+                .exec();
+        })
+        .then(doc => resolve(doc))
+        .catch(e => reject(e));
+    });
 };
 
 module.exports = {
     removeCard,
     addCard,
     getAllCards,
-    getCardById
+    getCardById,
+    updateSocketIdOnCard
 };
