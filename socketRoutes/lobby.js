@@ -2,7 +2,6 @@
 const db = require('../models/DAL/dbDAL.js');
 const dbUser = require('../models/DAL/dbUser.js');
 const dbCard = require('../models/DAL/dbCard.js');
-const dbDAL = require('../models/DAL/dbDAL.js');
 const co = require('co');
 
 const lobby = class {
@@ -14,13 +13,14 @@ const lobby = class {
     mockLobby(){
         dbUser.getUserByFbId('FBIDIzabella1')
             .then(user => dbCard.getCardByCardId(user.cards[0]))
-            .then(dbDAL.Lobby.addCard)
+            .then(db.Lobby.addCard)
             .catch(e => console.log(e));
     }
 
     emitLobby() {
-        return dbDAL.Lobby.getAllCards()
+        return db.Lobby.getAllCards()
             .then(cards => cards.map(card => card.card))
+            //.then(cards => { console.log(cards); return cards;}) // DEBUGG
             .then(cards => this.io.sockets.to('lobby').emit('update', cards))
             .catch(e => console.log(e));
     }
@@ -29,56 +29,40 @@ const lobby = class {
      * [runs when somone wants to add card to lobby]
      * @param  {[object]} card [card object]
      */
-    onLobbyAddCard(card) {
-        this.onAddCardToLobby(card);
+    onLobbyAddCard(card, socketId) {
+        this.onAddCardToLobby(card, socketId);
     }
 
     /**
-     * [emits lobby if someone joins it]
+     * [when user joins lobby, checks if anny of user cards is is lobby and updates those cards socketId prop]
+     * @param  {[string]} fbId     [facebook id of user who joins]
+     * @param  {[string]} socketId [socket   id of user who joins]
      */
     onLobbyJoin(fbId, socketId) {
+        co(function* (){
+            const myCards = yield db.getUserCardsByFbId(fbId);
+            const isMyCardsInLobby = yield myCards
+                .map(myCard => db.Lobby.getCardById(myCard._id));
+            const myCardsInLobby = isMyCardsInLobby.filter(card => card !== undefined);
 
-        /*co(function* (){
-            const myCards = yield dbUser.getUserCardsByFbId();
-            const lobbyCards = yield dbDAL.Lobby.getAllCards();
-
-            lobbyCards.filter(card => {
-                if(card.card._id)
-            })
-
+            return myCardsInLobby
+                .map(lobbyCard =>
+                    db.Lobby.updateSocketIdOnCard(lobbyCard.card._id, socketId));
         })
-        .then((cards) => {
-
-        })
-        .catch(e => console.log(e));
-
-
-
-        dbUser.getUserCardsByFbId()
-            .then(cards =>
-                dbDAL.Lobby.getAllCards())
-            .then()
-            .catch(e => console.log(e));
-
-        dbDAL.Lobby.getAllCards()
-            .then(result => {
-                result.filter(card => {
-                    console.log(card);
-                });
-            })
-            .catch(e => console.log(e));
-            */
-        this.emitLobby();
+        .then((cards) => this.emitLobby())
+        .catch(e => console.log('somthing went wrong while joining lobby: ', e));
     }
 
     /**
      * [adds card to lobby]
      * @param  {[object]} card [card object]
      */
-    onAddCardToLobby(card){
-        return dbCard.getCardByCardId(card._id)
-            .then(card =>
-                dbDAL.Lobby.addCard(card))
+    onAddCardToLobby(card, socketId){
+        return dbCard.getCardByCardIdLean(card._id)
+            .then(card => {
+                card.socketId = socketId;
+                return db.Lobby.addCard(card);
+            })
             .then(this.emitLobby.bind(this))
             .catch(e =>
                 console.log('Could not add to lobby: ', e));
@@ -95,7 +79,7 @@ const lobby = class {
                 return Promise.all(cards.map((card) =>
                     this.removeFromLobby(card._id)));
             })
-            .then(this.emitLobby.bind(this))
+            .then(value => this.emitLobby)
             .catch((e) =>
                 console.log('Could not remove alla cards from lobby: ', e));
     }
@@ -106,8 +90,8 @@ const lobby = class {
      */
     onRemoveCard(card){
         return dbCard.getCardByCardId(card._id)
-            .then((card) => this.removeFromLobby(card._id))
-            .then(this.emitLobby.bind(this))
+            .then(card => this.removeFromLobby(card._id))
+            .then(value => this.emitLobby())
             .catch((e) =>
                 console.log('Could not remove card from lobby: ', e));
     }
@@ -118,7 +102,7 @@ const lobby = class {
      * @param  {[array]} array [array to remove item in]
      */
     removeFromLobby(id){
-        return dbDAL.Lobby.removeCard(id);
+        return db.Lobby.removeCard(id);
     }
 
 };
