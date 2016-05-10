@@ -64,9 +64,27 @@ const getCardByCardId = (id) => {
     });
 };
 
+
+/**
+ * [same as getCardByCardId expet returns pure object and not a mongoose object]
+ * @param  {[string]} id [id of a card]
+ * @return {[object]}    [card object]
+ */
+const getCardByCardIdLean = (id) => {
+    return new Promise((resolve, reject) => {
+        Card
+            .findById(id)
+            .lean()
+            .exec()
+            .then(card => resolve(card))
+            .catch(e => reject(e));
+    });
+};
+
 module.exports = {
     createNewCard,
     createNewCardSave,
     getAllCards,
-    getCardByCardId
+    getCardByCardId,
+    getCardByCardIdLean
 };
