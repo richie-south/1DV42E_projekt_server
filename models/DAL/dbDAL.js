@@ -13,7 +13,7 @@ const co = require('co');
  * @param  {[string]} fbProfileImg [url to a image]
  * @param  {[string]} firstName    [first name of user]
  * @param  {[string]} lastName     [last name of user]
- * @return {[object]}              [user object]
+ * @return {[promise]}              [resolves to user object]
  */
 const createNewPlayerWithCard = (fbId, fbProfileImg, firstName, lastName) => {
     return new Promise((resolve, reject) => {
@@ -27,16 +27,15 @@ const createNewPlayerWithCard = (fbId, fbProfileImg, firstName, lastName) => {
             myUser.cards.push(myCard);
             return myUser.save();
         })
-        .then(result => {
-            resolve(result);
-        }).catch(e => reject(e));
+        .then(result => resolve(result))
+        .catch(e => reject(e));
     });
 };
 
 /** DEPRICATED
  * [gets all cards for user]
  * @param  {[string]} fbId [fbid of user]
- * @return {[array]}        [array of all user cards]
+ * @return {[promise]}        [resolves to array of all user cards]
  */
 const getCardsByCreatorId = (fbId) => {
     return new Promise((resolve, reject) => {
@@ -56,7 +55,7 @@ const getCardsByCreatorId = (fbId) => {
 /**
  * [gets usr owned cards]
  * @param  {[string]} fbId [facebook id of user]
- * @return {[array]}      [array of card objects]
+ * @return {[promise]}      [resolves to array of card objects]
  */
 const getUserCardsByFbId = (fbId) => {
     return new Promise(function(resolve, reject) {
@@ -66,50 +65,81 @@ const getUserCardsByFbId = (fbId) => {
                 '_id': { $in: cardIds}
             });
         })
-        .then((cards) => {
-            resolve(cards);
-        })
+        .then(cards => resolve(cards))
         .catch(e => reject(e));
     });
 };
+
+/**
+ * [removes a card from a user]
+ * @param  {[string]} fbId   [facebook id of a user]
+ * @param  {[string]} cardId [id of a card]
+ * @return {[promise]}        [resolves to result of save]
+ */
+const pullCardFromUser = (fbId, cardId) => {
+    return new Promise(function(resolve, reject) {
+        return User.findOneAndUpdate( { fbId: fbId },
+            { $pull: { cards: cardId } })
+            .then(u => u.save())
+            .then(result => resolve(result))
+            .catch(e => reject(e));
+    });
+};
+
+/**
+ * [adds a card to user mongo object]
+ * @param  {[string]} fbId   [facebook id of a user]
+ * @param  {[string]} cardId [id of a card]
+ * @return {[promise]}        [resolves result of save]
+ */
+const addCardToUser = (fbId, cardId) => {
+    return new Promise(function(resolve, reject) {
+        co(function* (){
+            const { user, card } = yield [
+                dbUser.getUserByFbId(fbId),
+                dbCard.getCardByCardId(cardId)
+            ];
+            user.cards.push(card);
+            return user.save();
+        })
+        .then(result => resolve(result))
+        .catch(e => reject(e));
+    });
+};
+
 
 /**
  * [transfers a card from a user to another user]
  * @param  {[string]} userOneFbId [facebook id of user, sends card]
  * @param  {[string]} cardId      [id of card to send]
  * @param  {[string]} userTwoFbId [facebook id of user, recives card]
- * @return {[object]}             [user object of the user that recived card]
+ * @return {[promise]}             [resolves to saved result of userB]
  */
-const sendCardFromUserToUser = (userOneFbId, cardId, userTwoFbId) => {
+const sendCardFromUserToUser = (userAFbId, cardId, userBFbId) => {
     return new Promise((resolve, reject) => {
         co(function* (){
-            console.log('addade kort');
-            const userA = yield dbUser.getUserByFbId(userOneFbId);
-            const userB = yield dbUser.getUserByFbId(userTwoFbId);
-
+            // retrives the two users
+            const { userA, userB } = yield [
+                dbUser.getUserByFbId(userAFbId),
+                dbUser.getUserByFbId(userBFbId)
+            ];
+            // gets userA cards
             const userACards = yield dbUser.getUserCardsIdByFbId(userA.fbId);
-            const cardIdToSend = userACards.filter((card) => {
+            // checks if cardId belongs to userA
+            const cardIdToSend = userACards.filter(card => {
                 if(card.toString() === cardId){
                     return card;
                 }
             })[0];
-            if(cardIdToSend === undefined){
+            // valid cardId
+            if(cardIdToSend === undefined || cardIdToSend === null){
                 throw 'cardId dont belong to user';
             }
-
-            const u = yield User.findOneAndUpdate(
-                    { fbId: userOneFbId },
-                    { $pull: { cards: cardIdToSend } });
-
-            u.save();
-            const cardToSend = yield dbCard.getCardByCardId(cardIdToSend);
-            userB.cards.push(cardToSend);
-            return userB.save();
-
+            yield pullCardFromUser(userA.fbId, cardIdToSend);
+            return addCardToUser(userB.fbId, cardIdToSend);
         })
-        .then(result => {
-            resolve(result);
-        }).catch(e => reject(e));
+        .then(result => resolve(result))
+        .catch(e => reject(e));
     });
 };
 
@@ -118,5 +148,7 @@ module.exports = {
     createNewPlayerWithCard,
     getCardsByCreatorId,
     getUserCardsByFbId,
-    sendCardFromUserToUser
+    sendCardFromUserToUser,
+    pullCardFromUser,
+    addCardToUser
 };
