@@ -1,15 +1,4 @@
 'use strict';
-const myMock = require('./myMock.js'); // TODO: remove when not needed
-
-const userDAL = require('./models/DAL/dbHelper.js');
-const express = require('express');
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
-const path = require('path');
-const jwt = require('jsonwebtoken');
-const config = require('./config/config.js');
-const Rx = require('rx');
-const validation = require('./models/jsonValidation.js');
 
 var env = process.env.NODE_ENV || 'development';
 if (env === 'development') {
@@ -17,6 +6,19 @@ if (env === 'development') {
     clear();
     clear();
 }
+
+const myMock = require('./myMock.js'); // TODO: remove when not needed
+
+const express = require('express');
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const path = require('path');
+const jwt = require('jsonwebtoken');
+const Rx = require('rx');
+const userDAL = require('./models/DAL/dbHelper.js');
+const Lobby = require('./socketRoutes/lobby.js');
+const config = require('./config/config.js');
+const validation = require('./models/jsonValidation.js');
 
 const app = express();
 const port = 3334;
@@ -52,8 +54,8 @@ const io = require('socket.io').listen(app.listen(port, function(){
     console.log('Listening on port ', port);
 }), { log: false, origins: '*:*' });
 
-const Lobby = require('./socketRoutes/lobby.js');
 const lobby = new Lobby(io);
+const removeFristTowCaracters = (string) => string.substring(2, string.length);
 
 io.sockets.on('connection', function (socket) {
 
@@ -61,14 +63,15 @@ io.sockets.on('connection', function (socket) {
     const lobbyStream = Rx.Observable.fromEvent(socket, 'lobby');
 
     const joinLobbyStream = roomStream
-        .filter(ev => ev === 'lobby');
+        .filter(ev => validation.joinLobbyValidation(ev))
+        .filter(ev => ev.room === 'lobby');
 
-    const joinLobbyAddCardStream = lobbyStream
+    const addCardStream = lobbyStream
         .filter(ev => typeof ev !== 'string')
         .filter(ev => validation.joinValidation(ev))
         .filter(ev => ev.add);
 
-    const removeLobbyCardStream = lobbyStream
+    const removeCardStream = lobbyStream
         .filter(ev => typeof ev !== 'string')
         .filter(ev => validation.joinValidation(ev))
         .filter(ev => !ev.add);
@@ -78,25 +81,43 @@ io.sockets.on('connection', function (socket) {
         .filter(ev => !ev.hasOwnProperty('leave') && ev.leave)
         .filter(ev => !ev.hasOwnProperty('fbId'));
 
-    joinLobbyStream.subscribe(function(data) {
+    const test = lobbyStream
+        .filter(ev => validation.testValidation(ev));
+
+    joinLobbyStream.subscribe((data) => {
         console.log('joinging lobby');
-        console.log(data);
-        socket.join(data);
-        lobby.onLobbyJoin();
+        socket.join(data.room);
+        lobby.onLobbyJoin(data.fbId, removeFristTowCaracters(socket.id));
+    }, (e) => {
+        console.log(e);
     });
 
-    joinLobbyAddCardStream.subscribe(function(data) {
+    addCardStream.subscribe((data) => {
         console.log('add card to lobby');
-        lobby.onLobbyAddCard(data.card);
+        lobby.onLobbyAddCard(data.card, removeFristTowCaracters(socket.id));
+    }, (e) => {
+        console.log(e);
     });
 
-    removeLobbyCardStream.subscribe(function(data) {
+    removeCardStream.subscribe((data) => {
         console.log('remove card from lobby');
         lobby.onRemoveCard(data.card);
+    }, (e) => {
+        console.log(e);
     });
 
-    leaveLobby.subscribe(function(data){
+    leaveLobby.subscribe((data) => {
         console.log('leaving lobby');
         lobby.onLobbyLeave(data.fbId);
+    }, (e) => {
+        console.log(e);
+    });
+
+    test.subscribe((data) => {
+        console.log('=======TEST======');
+        console.log(data);
+        console.log('=================');
+    }, (e) => {
+        console.log(e);
     });
 });
