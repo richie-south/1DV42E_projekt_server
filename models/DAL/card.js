@@ -18,7 +18,7 @@ const cardSchema = mongoose.Schema({
         blockBoost: { type: Number, default: 0 }
     },
     pastUsers: [
-        { type: Number, ref: 'User' }
+        { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
     ],
     createdAt: { type: Date, required: true, default: Date.now }
 });
