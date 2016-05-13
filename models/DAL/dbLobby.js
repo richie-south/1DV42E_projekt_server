@@ -63,7 +63,7 @@ const getAllCards = () => {
  */
 const getCardById = (id) => {
     // would like to use simpler form and get data dirr from mongoDb
-    // return Lobby.findOne({ 'card._id': id}).exec();
+    // return Lobby.findOne({ 'card._id': id}).exec(); // wont work :S
     return new Promise(function(resolve, reject) {
         co(function* (){
             const allCards = yield getAllCards();
