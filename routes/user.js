@@ -2,7 +2,6 @@
 // TODO: check up post validation
 const router = require('express').Router();
 const db = require('../models/DAL/dbDAL.js');
-
 const colors = require('colors');
 
 // create new user
@@ -41,10 +40,7 @@ router.route('/user/:fbid')
 router.route('/user/cards/:fbid')
     .get((req, res) => {
         db.getUserCardsByFbId(req.params.fbid)
-            .then(result => {
-                //console.log(result);
-                res.json(result);
-            })
+            .then(result => res.json(result))
             .catch(e => res.status(404).send('404'));
     });
 
@@ -53,9 +49,7 @@ router.route('/user/cards/:fbid')
 router.route('/users')
     .get((req, res) => {
         db.getAllUsers()
-            .then(result => {
-                res.json(result);
-            })
+            .then(result => res.json(result))
             .catch(e => res.status(404).send('404'));
     });
 
