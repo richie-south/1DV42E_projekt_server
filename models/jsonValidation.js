@@ -1,22 +1,32 @@
 'use strict';
 
 const joinValidation = (a) => {
-    if(!a.hasOwnProperty('add')){ throw 'missing add'; }
-    if(!a.hasOwnProperty('card')){ throw 'missing card'; }
-    if(!a.card.hasOwnProperty('_id')){ throw 'missing _id'; }
-    if(!a.card.hasOwnProperty('name')){ throw 'missing name'; }
-    if(!a.card.hasOwnProperty('avatar')){ throw 'missing avatar'; }
-    if(!a.card.hasOwnProperty('stats')){ throw 'missing stats'; }
-    if(!a.card.hasOwnProperty('_creator')){ throw 'missing _creator'; }
+    if(!a.hasOwnProperty('add')){ return false; }
+    if(!a.hasOwnProperty('card')){ return false; }
+    if(!a.card.hasOwnProperty('_id')){ return false; }
+    if(!a.card.hasOwnProperty('name')){ return false; }
+    if(!a.card.hasOwnProperty('avatar')){ return false; }
+    if(!a.card.hasOwnProperty('stats')){ return false; }
+    if(!a.card.hasOwnProperty('_creator')){ return false; }
     return true;
 };
 
 exports.joinValidation = joinValidation;
 
 const joinLobbyValidation = (a) => {
-    if(!a.hasOwnProperty('room')) { throw ''; }
-    if(!a.hasOwnProperty('fbId')) { throw ''; }
+    if(!a.hasOwnProperty('room')) { return false; }
+    if(!a.hasOwnProperty('fbId')) { return false; }
     return true;
 };
 
 exports.joinLobbyValidation = joinLobbyValidation;
+
+
+const testValidation = (a) => {
+    if(!a.hasOwnProperty('test')) { return false; }
+    if(!a.test) { return false; }
+    return true;
+};
+
+
+exports.testValidation = testValidation;
