@@ -95,7 +95,7 @@ const pullCardFromUser = (fbId, cardId) => {
 const addCardToUser = (fbId, cardId) => {
     return new Promise(function(resolve, reject) {
         co(function* (){
-            const { user, card } = yield [
+            const [ user, card ] = yield [
                 dbUser.getUserByFbId(fbId),
                 dbCard.getCardByCardId(cardId)
             ];
@@ -107,6 +107,27 @@ const addCardToUser = (fbId, cardId) => {
     });
 };
 
+/**
+ * [adds a user to cards past users]
+ * @param  {[string]} fbId   [facebook id of a ]
+ * @param  {[string]} cardId [card id of a card]
+ * @return {[promise]}       [resolves to result of card save]
+ */
+const addUserToCardPastUsers = (fbId, cardId) => {
+    return new Promise(function(resolve, reject) {
+        co(function* (){
+            const [ user, card ] = yield [
+                dbUser.getUserByFbId(fbId),
+                dbCard.getCardByCardId(cardId)
+            ];
+
+            card.pastUsers.push(user);
+            return card.save();
+        })
+        .then(result => resolve(result))
+        .catch(e => reject(e));
+    });
+};
 
 /**
  * [transfers a card from a user to another user]
@@ -119,7 +140,7 @@ const sendCardFromUserToUser = (userAFbId, cardId, userBFbId) => {
     return new Promise((resolve, reject) => {
         co(function* (){
             // retrives the two users
-            const { userA, userB } = yield [
+            const [ userA, userB ] = yield [
                 dbUser.getUserByFbId(userAFbId),
                 dbUser.getUserByFbId(userBFbId)
             ];
@@ -136,6 +157,7 @@ const sendCardFromUserToUser = (userAFbId, cardId, userBFbId) => {
                 throw 'cardId dont belong to user';
             }
             yield pullCardFromUser(userA.fbId, cardIdToSend);
+            yield addUserToCardPastUsers(userA.fbId, cardIdToSend);
             return addCardToUser(userB.fbId, cardIdToSend);
         })
         .then(result => resolve(result))
@@ -150,5 +172,6 @@ module.exports = {
     getUserCardsByFbId,
     sendCardFromUserToUser,
     pullCardFromUser,
-    addCardToUser
+    addCardToUser,
+    addUserToCardPastUsers
 };
