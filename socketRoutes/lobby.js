@@ -7,6 +7,9 @@ const co = require('co');
 const lobby = class {
     constructor(io) {
         this.io = io;
+        //this.onRemoveCard({_id: "5703b3bbd61b52010ec3f591"});
+        //this.onAddCardToLobby({_id: "5718df14579601d536e7cccc"}, 'socketSuperId');
+        //this.mockLobby();
     }
 
     // ads mock card to lobby
@@ -20,7 +23,6 @@ const lobby = class {
     emitLobby() {
         return db.Lobby.getAllCards()
             .then(cards => cards.map(card => card.card))
-            //.then(cards => { console.log(cards); return cards;}) // DEBUGG
             .then(cards => this.io.sockets.to('lobby').emit('update', cards))
             .catch(e => console.log(e));
     }
@@ -72,15 +74,14 @@ const lobby = class {
      * [runs when someone wants to leave lobby]
      * @param  {[string]} fbId [facebook user id]
      */
-    onLobbyLeave(fbId) {
-        return dbUser.getUserByFbId(fbId)
-            .then(user => db.getCardsByCreatorId(user.fbId))
-            .then(cards => {
-                return Promise.all(cards.map((card) =>
-                    this.removeFromLobby(card._id)));
-            })
-            .then(value => this.emitLobby)
-            .catch((e) =>
+    onLobbyLeave(socketId) {
+        return db.Lobby.getCardBySocketId(socketId)
+            .then(result => result
+                .map(lobbyCards => lobbyCards.card._id)
+                .map(cardId => db.Lobby.removeCard(cardId))
+            )
+            .then(result => this.emitLobby())
+            .catch(e =>
                 console.log('Could not remove alla cards from lobby: ', e));
     }
 
