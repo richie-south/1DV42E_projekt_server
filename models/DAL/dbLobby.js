@@ -80,6 +80,23 @@ const getCardById = (id) => {
     });
 };
 
+
+const getCardBySocketId = (socketId) => {
+    return new Promise(function(resolve, reject) {
+        co(function* (){
+            const allCards = yield getAllCards();
+            return allCards
+                .filter(lobbyCard => {
+                    if(lobbyCard.card.socketId === socketId){
+                        return lobbyCard;
+                    }
+                });
+        })
+        .then(doc => resolve(doc))
+        .catch(e => reject(e));
+    });
+};
+
 /**
  * [updates socket id property of cards in lobby]
  * @param  {[string]} cardId   [id of a card]
@@ -103,5 +120,6 @@ module.exports = {
     addCard,
     getAllCards,
     getCardById,
-    updateSocketIdOnCard
+    updateSocketIdOnCard,
+    getCardBySocketId
 };
