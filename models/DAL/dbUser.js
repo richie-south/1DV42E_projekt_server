@@ -27,24 +27,17 @@ const createNewUser = (fbId, fbProfileImg, firstName, lastName) => {
  * @return {[object]}      [user props]
  */
 const getUserByFbId = (fbId) => {
-    return new Promise((resolve, reject) => {
-        User
-            .findOne({ fbId : fbId })
-            .exec()
-            .then(doc => resolve(doc))
-            .catch(e => reject(e));
-    });
+    return User
+        .findOne({ fbId : fbId })
+        .exec();
 };
 
+/**
+ * [gets all users]
+ * @return {[promise]} [all user objects]
+ */
 const getAllUsers = () => {
-    return new Promise((resolve, reject) => {
-        User.find({}, function(err, users) {
-                if(err){
-                    reject(err);
-                }
-                resolve(users);
-            });
-    });
+    return User.find({});
 };
 
 /**
@@ -53,11 +46,12 @@ const getAllUsers = () => {
  * @return {[array]}      [array of cards id]
  */
 const getUserCardsIdByFbId = (fbId) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         co(function* (){
             const user = yield User
                     .findOne({ fbId: fbId})
                     .select({ cards: 1 });
+            if(user === undefined || user === null){ throw 'user of null or undefined'; }
             return user.cards;
         })
         .then((cards) => {
