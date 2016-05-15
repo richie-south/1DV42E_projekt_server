@@ -38,16 +38,11 @@ const createNewCardSave = (creatorId, name, avatar) => {
 };
 
 /**
- * [retrives all cards in mongodb, for development purpoes only]
+ * [retrives all cards in mongodb]
  * @return {[array]} [all cards in array]
  */
 const getAllCards = () => {
-    return new Promise((resolve, reject) => {
-        Card
-            .find({})
-            .then(doc => resolve(doc))
-            .catch(e => reject(e));
-    });
+    return Card.find({});
 };
 
 /**
@@ -56,12 +51,7 @@ const getAllCards = () => {
  * @return {[object]}    [card object]
  */
 const getCardByCardId = (id) => {
-    return new Promise((resolve, reject) => {
-        Card
-            .findById(id)
-            .then(card => resolve(card))
-            .catch(e => reject(e));
-    });
+    return Card.findById(id);
 };
 
 
@@ -71,14 +61,10 @@ const getCardByCardId = (id) => {
  * @return {[object]}    [card object]
  */
 const getCardByCardIdLean = (id) => {
-    return new Promise((resolve, reject) => {
-        Card
-            .findById(id)
-            .lean()
-            .exec()
-            .then(card => resolve(card))
-            .catch(e => reject(e));
-    });
+    return Card
+        .findById(id)
+        .lean()
+        .exec();
 };
 
 module.exports = {
