@@ -5,6 +5,7 @@ const Card = require('./card.js');
 const dbUser = require('./dbUser.js');
 const dbCard = require('./dbCard.js');
 const Lobby = require('./dbLobby.js');
+const dbChallange = require('./dbChallange.js');
 const co = require('co');
 
 /**
@@ -58,7 +59,7 @@ const getCardsByCreatorId = (fbId) => {
  * @return {[promise]}      [resolves to array of card objects]
  */
 const getUserCardsByFbId = (fbId) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         co(function* (){
             const cardIds = yield dbUser.getUserCardsIdByFbId(fbId);
             return Card.find({
@@ -77,7 +78,7 @@ const getUserCardsByFbId = (fbId) => {
  * @return {[promise]}        [resolves to result of save]
  */
 const pullCardFromUser = (fbId, cardId) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         return User.findOneAndUpdate( { fbId: fbId },
             { $pull: { cards: cardId } })
             .then(u => u.save())
@@ -99,7 +100,7 @@ const getUserByCardId = (cardId) => {
  * @return {[promise]}        [resolves result of save]
  */
 const addCardToUser = (fbId, cardId) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         co(function* (){
             const [ user, card ] = yield [
                 dbUser.getUserByFbId(fbId),
@@ -120,7 +121,7 @@ const addCardToUser = (fbId, cardId) => {
  * @return {[promise]}       [resolves to result of card save]
  */
 const addUserToCardPastUsers = (fbId, cardId) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         co(function* (){
             const [ user, card ] = yield [
                 dbUser.getUserByFbId(fbId),
@@ -173,11 +174,15 @@ const sendCardFromUserToUser = (userAFbId, cardId, userBFbId) => {
 
 module.exports = {
     Lobby,
+    dbChallange,
+    dbUser,
+    dbCard,
     createNewPlayerWithCard,
     getCardsByCreatorId,
     getUserCardsByFbId,
     sendCardFromUserToUser,
     pullCardFromUser,
     addCardToUser,
-    addUserToCardPastUsers
+    addUserToCardPastUsers,
+    getUserByCardId
 };
