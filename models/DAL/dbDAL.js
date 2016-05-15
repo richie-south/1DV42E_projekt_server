@@ -86,6 +86,12 @@ const pullCardFromUser = (fbId, cardId) => {
     });
 };
 
+
+const getUserByCardId = (cardId) => {
+    return User.findOne({ 'cards': cardId })
+        .exec();
+};
+
 /**
  * [adds a card to user mongo object]
  * @param  {[string]} fbId   [facebook id of a user]

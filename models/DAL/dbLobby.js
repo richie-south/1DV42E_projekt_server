@@ -48,12 +48,7 @@ const addCard = (card) => {
  * @return {[promise]} [resolve all cards]
  */
 const getAllCards = () => {
-    return new Promise((resolve, reject) => {
-        Lobby
-            .find({})
-            .then(doc => resolve(doc))
-            .catch(e => reject(e));
-    });
+    return Lobby.find({});
 };
 
 /**
