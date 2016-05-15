@@ -76,9 +76,9 @@ const lobby = class {
      */
     onLobbyLeave(socketId) {
         return db.Lobby.getCardBySocketId(socketId)
-            .then(result => result
+            .then(result => Promise.all(result
                 .map(lobbyCards => lobbyCards.card._id)
-                .map(cardId => db.Lobby.removeCard(cardId))
+                .map(cardId => db.Lobby.removeCard(cardId)))
             )
             .then(result => this.emitLobby())
             .catch(e =>
