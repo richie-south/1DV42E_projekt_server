@@ -31,7 +31,7 @@ router.route('/user/create')
 // get user
 router.route('/user/:fbid')
     .get((req, res) => {
-        db.getUserByFbId(req.params.fbid)
+        db.dbUser.getUserByFbId(req.params.fbid)
             .then(result => res.json(result))
             .catch(e => res.status(404).send('404'));
     });
