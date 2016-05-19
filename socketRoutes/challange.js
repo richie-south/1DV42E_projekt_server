@@ -62,15 +62,22 @@ const Challange = class {
      * @param  {[string]} roomId [room to sent to]
      * @param  {[type]} socket [socket object]
      */
-    sendGameInfo(roomId, socket){
+    sendGameInfo(roomId, socket, challangerFbId = ''){
         db.dbChallange.getChallangeById(roomId)
             .then(challange => {
                 this.io.in(roomId).emit('gameInfo', {
                     roomId,
-                    challange
+                    challange,
+                    id: challangerFbId
                 });
             })
-            .catch(e => console.log('error', e));
+            .catch(e => console.log('error ', e));
+    }
+
+    prePlayData(roomId, data, socket){
+        socket.broadcast.to(roomId).emit('prePlayData', { add: data.add, pos: data.pos});
+        //this.io.sockets.in(roomId).emit('prePlayData', { add: data.add, pos: data.pos});
+
     }
 };
 
