@@ -7,7 +7,8 @@ const challangeSchema = mongoose.Schema({
         healCards: { type: Number, min: 4, default: 4, required: true},
         attackCards: { type: Number, min: 4, default: 4, required: true },
         blockCards: { type: Number, min: 4, default: 4, required: true },
-        maxLife: { type: Number, min: 100, default: 100, required: true }
+        maxLife: { type: Number, min: 100, default: 100, required: true },
+        life: { type: Number, min: 0, default: 100, required: true }
     },
 
     challanger: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
