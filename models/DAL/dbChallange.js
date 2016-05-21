@@ -31,6 +31,27 @@ const getChallangeById = (id) => {
         .populate('challanger')
         .populate('opponent')
         .populate('opponentCard')
+        .populate('challangerRounds')
+        .populate('opponentRounds')
+        .exec();
+};
+
+const getChallangeByIdNoPopulate = (id) => {
+    return Challange.findOne({ _id: id })
+        .exec();
+};
+
+/**
+ * [retrives callange object from id, lean from]
+ * @param  {[string]} id [id of object]
+ * @return {[prmise]}    [resolves to object of a challange]
+ */
+const getChallangeByIdLean = (id) => {
+    return Challange.findOne({ _id: id })
+        .populate('challangerCard')
+        .populate('challanger')
+        .populate('opponent')
+        .populate('opponentCard')
         .lean()
         .exec();
 };
@@ -43,5 +64,7 @@ const getAllChallanges = () => {
 module.exports = {
     newChallange,
     getChallangeById,
+    getChallangeByIdLean,
+    getChallangeByIdNoPopulate,
     getAllChallanges
 };
