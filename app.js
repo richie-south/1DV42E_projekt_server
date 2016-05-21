@@ -65,6 +65,7 @@ io.sockets.on('connection', function (socket) {
     const lobbyStream = Rx.Observable.fromEvent(socket, 'lobby');
     const disconnect = Rx.Observable.fromEvent(socket, 'disconnect');
     const prePlayData = Rx.Observable.fromEvent(socket, 'prePlayData');
+    const roundResult = Rx.Observable.fromEvent(socket, 'roundResult');
 
     const joinLobbyStream = roomStream
         .filter(ev => validation.joinLobbyValidation(ev))
@@ -92,12 +93,6 @@ io.sockets.on('connection', function (socket) {
         .filter(ev => typeof ev !== 'string')
         .filter(ev => !ev.hasOwnProperty('leave') && ev.leave)
         .filter(ev => !ev.hasOwnProperty('fbId'));
-
-    /*const prePlayDataAdd = prePlayData
-        .filter(ev => ev.hasOwnProperty('add') && ev.add);
-
-    const prePlayDataRemove = prePlayData
-        .filter(ev => ev.hasOwnProperty('add') && !ev.add);*/
 
     const test = lobbyStream
         .filter(ev => validation.testValidation(ev));
@@ -165,7 +160,14 @@ io.sockets.on('connection', function (socket) {
         const prop = Object.keys(socket.rooms)[1];
         challange.prePlayData(socket.rooms[prop].toString(), data, socket);
     }, (e) => {
-        console.log('error');
+        console.log('error: ', e);
+    });
+
+    roundResult.subscribe((data) => {
+        const prop = Object.keys(socket.rooms)[1];
+        challange.addRoundData(socket.rooms[prop].toString(), data, socket);
+    }, (e) => {
+        console.log('error: ', e);
     });
 
     test.subscribe((data) => {
