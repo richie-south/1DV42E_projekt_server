@@ -17,8 +17,8 @@ const co = require('co');
  * @param  {[string]} lastName     [last name of user]
  * @return {[promise]}              [resolves to user object]
  */
-const createNewPlayerWithCard = (fbId, fbProfileImg, firstName, lastName) => {
-    return new Promise((resolve, reject) => {
+const createNewPlayerWithCard = (fbId, fbProfileImg, firstName, lastName) =>
+    new Promise((resolve, reject) => {
         co(function* (){
             const myUser = dbUser.createNewUser(fbId, fbProfileImg, firstName, lastName);
             const myUserDoc = yield myUser.save();
@@ -32,15 +32,14 @@ const createNewPlayerWithCard = (fbId, fbProfileImg, firstName, lastName) => {
         .then(result => resolve(result))
         .catch(e => reject(e));
     });
-};
 
 /** DEPRICATED
  * [gets all cards for user]
  * @param  {[string]} fbId [fbid of user]
  * @return {[promise]}        [resolves to array of all user cards]
  */
-const getCardsByCreatorId = (fbId) => {
-    return new Promise((resolve, reject) => {
+const getCardsByCreatorId = (fbId) =>
+    new Promise((resolve, reject) => {
         co(function* (){
             const user = yield User
                     .findOne({ fbId: fbId})
@@ -52,15 +51,14 @@ const getCardsByCreatorId = (fbId) => {
         .then(result => resolve(result))
         .catch(e => reject(e));
     });
-};
 
 /**
  * [gets usr owned cards]
  * @param  {[string]} fbId [facebook id of user]
  * @return {[promise]}      [resolves to array of card objects]
  */
-const getUserCardsByFbId = (fbId) => {
-    return new Promise((resolve, reject) => {
+const getUserCardsByFbId = (fbId) =>
+    new Promise((resolve, reject) => {
         co(function* (){
             const cardIds = yield dbUser.getUserCardsIdByFbId(fbId);
             return Card.find({
@@ -70,7 +68,6 @@ const getUserCardsByFbId = (fbId) => {
         .then(cards => resolve(cards))
         .catch(e => reject(e));
     });
-};
 
 /**
  * [removes a card from a user]
@@ -78,21 +75,19 @@ const getUserCardsByFbId = (fbId) => {
  * @param  {[string]} cardId [id of a card]
  * @return {[promise]}        [resolves to result of save]
  */
-const pullCardFromUser = (fbId, cardId) => {
-    return new Promise((resolve, reject) => {
+const pullCardFromUser = (fbId, cardId) =>
+    new Promise((resolve, reject) => {
         return User.findOneAndUpdate( { fbId: fbId },
             { $pull: { cards: cardId } })
             .then(u => u.save())
             .then(result => resolve(result))
             .catch(e => reject(e));
     });
-};
 
 
-const getUserByCardId = (cardId) => {
-    return User.findOne({ 'cards': cardId })
+const getUserByCardId = (cardId) =>
+    User.findOne({ 'cards': cardId })
         .exec();
-};
 
 /**
  * [adds a card to user mongo object]
@@ -100,8 +95,8 @@ const getUserByCardId = (cardId) => {
  * @param  {[string]} cardId [id of a card]
  * @return {[promise]}        [resolves result of save]
  */
-const addCardToUser = (fbId, cardId) => {
-    return new Promise((resolve, reject) => {
+const addCardToUser = (fbId, cardId) =>
+    new Promise((resolve, reject) => {
         co(function* (){
             const [ user, card ] = yield [
                 dbUser.getUserByFbId(fbId),
@@ -113,7 +108,6 @@ const addCardToUser = (fbId, cardId) => {
         .then(result => resolve(result))
         .catch(e => reject(e));
     });
-};
 
 /**
  * [adds a user to cards past users]
@@ -121,8 +115,8 @@ const addCardToUser = (fbId, cardId) => {
  * @param  {[string]} cardId [card id of a card]
  * @return {[promise]}       [resolves to result of card save]
  */
-const addUserToCardPastUsers = (fbId, cardId) => {
-    return new Promise((resolve, reject) => {
+const addUserToCardPastUsers = (fbId, cardId) =>
+    new Promise((resolve, reject) => {
         co(function* (){
             const [ user, card ] = yield [
                 dbUser.getUserByFbId(fbId),
@@ -135,7 +129,6 @@ const addUserToCardPastUsers = (fbId, cardId) => {
         .then(result => resolve(result))
         .catch(e => reject(e));
     });
-};
 
 /**
  * [transfers a card from a user to another user]
@@ -144,8 +137,8 @@ const addUserToCardPastUsers = (fbId, cardId) => {
  * @param  {[string]} userTwoFbId [facebook id of user, recives card]
  * @return {[promise]}             [resolves to saved result of userB]
  */
-const sendCardFromUserToUser = (userAFbId, cardId, userBFbId) => {
-    return new Promise((resolve, reject) => {
+const sendCardFromUserToUser = (userAFbId, cardId, userBFbId) =>
+    new Promise((resolve, reject) => {
         co(function* (){
             // retrives the two users
             const [ userA, userB ] = yield [
@@ -171,7 +164,6 @@ const sendCardFromUserToUser = (userAFbId, cardId, userBFbId) => {
         .then(result => resolve(result))
         .catch(e => reject(e));
     });
-};
 
 module.exports = {
     Lobby,

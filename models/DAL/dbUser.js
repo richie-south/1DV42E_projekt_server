@@ -10,8 +10,8 @@ const co = require('co');
  * @param  {[string]} lastName     [last name]
  * @return {[object]}              [user]
  */
-const createNewUser = (fbId, fbProfileImg, firstName, lastName) => {
-    return new User({
+const createNewUser = (fbId, fbProfileImg, firstName, lastName) =>
+    new User({
         fbId,
         fbProfileImg,
         name: {
@@ -19,34 +19,30 @@ const createNewUser = (fbId, fbProfileImg, firstName, lastName) => {
             last: lastName
         }
     });
-};
 
 /**
  * [retrives specifik user by fb id]
  * @param  {[string]} fbId [id from user on facebook]
  * @return {[object]}      [user props]
  */
-const getUserByFbId = (fbId) => {
-    return User
+const getUserByFbId = (fbId) =>
+    User
         .findOne({ fbId : fbId })
         .exec();
-};
 
 /**
  * [gets all users]
  * @return {[promise]} [all user objects]
  */
-const getAllUsers = () => {
-    return User.find({});
-};
+const getAllUsers = () => User.find({});
 
 /**
  * [gets all cards owned by user]
  * @param  {[string]} fbId [facebook id of a user]
  * @return {[array]}      [array of cards id]
  */
-const getUserCardsIdByFbId = (fbId) => {
-    return new Promise((resolve, reject) => {
+const getUserCardsIdByFbId = (fbId) =>
+    new Promise((resolve, reject) => {
         co(function* (){
             const user = yield User
                     .findOne({ fbId: fbId})
@@ -59,7 +55,6 @@ const getUserCardsIdByFbId = (fbId) => {
         })
         .catch(e => reject(e));
     });
-};
 
 module.exports = {
     createNewUser,

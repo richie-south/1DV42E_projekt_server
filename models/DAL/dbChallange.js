@@ -11,22 +11,21 @@ const co = require('co');
  * @param  {[mongoose card Object]} opponentCard   [description]
  * @return {[object]}                [result of new]
  */
-const newChallange = (challanger, challangerCard, opponent, opponentCard) => {
-    return new Challange({
+const newChallange = (challanger, challangerCard, opponent, opponentCard) =>
+    new Challange({
         challanger,
         challangerCard,
         opponent,
         opponentCard
-    });
-};
+    }); 
 
 /**
  * [retrives callange object from id]
  * @param  {[string]} id [id of object]
  * @return {[prmise]}    [resolves to object of a challange]
  */
-const getChallangeById = (id) => {
-    return Challange.findOne({ _id: id })
+const getChallangeById = (id) =>
+    Challange.findOne({ _id: id })
         .populate('challangerCard')
         .populate('challanger')
         .populate('opponent')
@@ -34,32 +33,26 @@ const getChallangeById = (id) => {
         .populate('challangerRounds')
         .populate('opponentRounds')
         .exec();
-};
 
-const getChallangeByIdNoPopulate = (id) => {
-    return Challange.findOne({ _id: id })
+const getChallangeByIdNoPopulate = (id) =>
+    Challange.findOne({ _id: id })
         .exec();
-};
 
 /**
  * [retrives callange object from id, lean from]
  * @param  {[string]} id [id of object]
  * @return {[prmise]}    [resolves to object of a challange]
  */
-const getChallangeByIdLean = (id) => {
-    return Challange.findOne({ _id: id })
+const getChallangeByIdLean = (id) =>
+    Challange.findOne({ _id: id })
         .populate('challangerCard')
         .populate('challanger')
         .populate('opponent')
         .populate('opponentCard')
         .lean()
         .exec();
-};
 
-const getAllChallanges = () => {
-    return Challange.find({});
-};
-
+const getAllChallanges = () => Challange.find({});
 
 module.exports = {
     newChallange,

@@ -11,15 +11,13 @@ const colors = new Colors();
  * @param  {[strinf]} avatar    [image for card]
  * @return {[object]}           [card]
  */
-const createNewCard = (creatorId, name, avatar) => {
-    return new Card({
+const createNewCard = (creatorId, name, avatar) =>
+    new Card({
         _creator: creatorId,
         name,
         avatar,
         backgroundCardImg: colors.getRandomColor()
     });
-};
-
 /**
  * [creates new card and saves it]
  * @param  {[string]} creatorId [user id card will belong to]
@@ -41,18 +39,14 @@ const createNewCardSave = (creatorId, name, avatar) => {
  * [retrives all cards in mongodb]
  * @return {[array]} [all cards in array]
  */
-const getAllCards = () => {
-    return Card.find({});
-};
+const getAllCards = () => Card.find({});
 
 /**
  * [returns one card with matching id]
  * @param  {[string]} id [id of a card]
  * @return {[object]}    [card object]
  */
-const getCardByCardId = (id) => {
-    return Card.findById(id);
-};
+const getCardByCardId = (id) => Card.findById(id);
 
 
 /**
@@ -60,12 +54,11 @@ const getCardByCardId = (id) => {
  * @param  {[string]} id [id of a card]
  * @return {[object]}    [card object]
  */
-const getCardByCardIdLean = (id) => {
-    return Card
+const getCardByCardIdLean = (id) =>
+    Card
         .findById(id)
         .lean()
         .exec();
-};
 
 module.exports = {
     createNewCard,
