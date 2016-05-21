@@ -1,6 +1,9 @@
 'use strict';
 const db = require('../models/DAL/dbDAL.js');
+const GameCalculator = require('../models/gameCalculator.js');
 const co = require('co');
+
+
 
 const Challange = class {
     constructor(io) {
@@ -49,6 +52,8 @@ const Challange = class {
                 );
                 yield game.save();
                 this.sendMessageToPlayer(opponentSocketId.card.socketId, game._id, socket);
+
+                console.log(game._id);
                 return game._id;
             }.bind(this))
             .then(roomId => resolve(roomId))
@@ -63,7 +68,7 @@ const Challange = class {
      * @param  {[type]} socket [socket object]
      */
     sendGameInfo(roomId, socket, challangerFbId = ''){
-        db.dbChallange.getChallangeById(roomId)
+        db.dbChallange.getChallangeByIdLean(roomId)
             .then(challange => {
                 this.io.in(roomId).emit('gameInfo', {
                     roomId,
@@ -77,7 +82,49 @@ const Challange = class {
     prePlayData(roomId, data, socket){
         socket.broadcast.to(roomId).emit('prePlayData', { add: data.add, pos: data.pos});
         //this.io.sockets.in(roomId).emit('prePlayData', { add: data.add, pos: data.pos});
+    }
 
+    calculateRoundResult(challange){
+        const gameCalculator = new GameCalculator(challange);
+    }
+
+    addRoundData(roomId, data, socket){
+        co(function* (){
+            const [ challange, gameRound, challangeNoPoop ] = yield [
+                db.dbChallange.getChallangeById(roomId),
+                db.dbGameRound.newRoundData(
+                        data.cardTypes[0],
+                        data.cardTypes[1],
+                        data.cardTypes[2]),
+                db.dbChallange.getChallangeByIdNoPopulate(roomId)
+            ];
+            const round = yield gameRound.save();
+
+            if(challange.challanger.fbId === data.fbId){
+                challangeNoPoop.challangerRounds.push(round);
+            }else{
+                challangeNoPoop.opponentRounds.push(round);
+            }
+            const saveResult = yield challangeNoPoop.save();
+
+            /*console.log('saveResult: ', saveResult);
+            console.log('cLength: ', challange.challangerRounds.length);
+            console.log('oLength: ', challange.opponentRounds.length);*/
+
+            if(challangeNoPoop.challangerRounds.length === challangeNoPoop.opponentRounds.length){
+                console.log('Lika långa');
+                /*yield this.calculateRoundResult(
+                    challange,
+                    challange.challangerCard,
+                    challange.challangerRounds,
+                    challange.opponentCard,
+                    challange.opponentRounds
+                );*/
+            }
+
+        }.bind(this))
+        .then(result => console.log(result))
+        .catch(e => console.log(e));
     }
 };
 
