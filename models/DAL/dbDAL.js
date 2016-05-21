@@ -6,6 +6,7 @@ const dbUser = require('./dbUser.js');
 const dbCard = require('./dbCard.js');
 const Lobby = require('./dbLobby.js');
 const dbChallange = require('./dbChallange.js');
+const dbGameRound = require('./dbGameRound.js');
 const co = require('co');
 
 /**
@@ -177,6 +178,7 @@ module.exports = {
     dbChallange,
     dbUser,
     dbCard,
+    dbGameRound,
     createNewPlayerWithCard,
     getCardsByCreatorId,
     getUserCardsByFbId,
