@@ -47,9 +47,9 @@ const lobby = class {
                 .map(myCard => db.Lobby.getCardById(myCard._id));
             const myCardsInLobby = isMyCardsInLobby.filter(card => card !== undefined);
 
-            return myCardsInLobby
+            return Promise.all(myCardsInLobby
                 .map(lobbyCard =>
-                    db.Lobby.updateSocketIdOnCard(lobbyCard.card._id, socketId));
+                    db.Lobby.updateSocketIdOnCard(lobbyCard.card._id, socketId)));
         })
         .then((cards) => this.emitLobby())
         .catch(e => console.log('somthing went wrong while joining lobby: ', e));
