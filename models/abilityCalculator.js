@@ -180,12 +180,3 @@ module.exports = {
     attackOnHeal,
     healOnAttack
 };
-
-//console.log(attackOnBlock(40, 100, 30, 4, 2));
-//console.log(blockOnAttack(40, 100, 30, 4, 2));
-
-//console.log(blockOnHeal(80, 20, 100, 4, 2));
-//console.log(healOnBlock(80, 20, 100, 4, 2));
-
-//console.log(attackOnHeal(100, 40, 2, 4));
-//console.log(healOnAttack(100, 40, 2, 4));
