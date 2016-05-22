@@ -1,7 +1,9 @@
 'use strict';
 
+const abilityCalculator = require('./abilityCalculator.js');
 const unusedType = 10;
 const maxNrOfRounds = 3;
+
 const GameCalculator = class {
     constructor(challange) {
 
@@ -48,6 +50,13 @@ const GameCalculator = class {
         };
     }
 
+    getRounds(){
+        return [
+            this.challangerRoundsDamage,
+            this.opponentRoundsDamage
+        ];
+    }
+
     calculateRoundResult(cCard, cProps, cRounds, oCard, oProps, oRounds){
         let state = this.getInitialState(cProps, oProps);
         let results = [];
@@ -65,6 +74,9 @@ const GameCalculator = class {
             oRound.cardPosOne,
             oRound.cardPosTwo,
             oRound.cardPosThree);
+        // deep copy array
+        this.challangerRoundsDamage = JSON.parse(JSON.stringify(challangerRoundsDamage));
+        this.opponentRoundsDamage = JSON.parse(JSON.stringify(opponentRoundsDamage));
 
         for (let i = 0; i < 3; i++) {
 
@@ -94,163 +106,70 @@ const GameCalculator = class {
     updateState(state, newState){
         if(newState === null){ return state; }
         let myState = {};
-        myState.cMaxLife = newState.cMaxLife ? newState.cMaxLife : state.cMaxLife;
-        myState.cLife = newState.cLife ? newState.cLife : state.cLife;
-        myState.cHealCards = newState.cHealCards ? newState.cHealCards : state.cHealCards;
-        myState.cAttackCards = newState.cAttackCards ? newState.cAttackCards : state.cAttackCards;
-        myState.cBlockCards = newState.cBlockCards ? newState.cBlockCards : state.cBlockCards;
+        myState.cMaxLife = newState.cMaxLife || newState.cMaxLife === 0 ? newState.cMaxLife : state.cMaxLife;
+        myState.cLife = newState.cLife || newState.cLife === 0 ? newState.cLife : state.cLife;
+        myState.cHealCards = newState.cHealCards || newState.cHealCards === 0 ? newState.cHealCards : state.cHealCards;
+        myState.cAttackCards = newState.cAttackCards || newState.cAttackCards === 0 ? newState.cAttackCards : state.cAttackCards;
+        myState.cBlockCards = newState.cBlockCards || newState.cBlockCards === 0 ? newState.cBlockCards : state.cBlockCards;
 
-        myState.oMaxLife = newState.oMaxLife ? newState.oMaxLife : state.oMaxLife;
-        myState.oLife = newState.oLife ? newState.oLife : state.oLife;
-        myState.oHealCards = newState.oHealCards ? newState.oHealCards : state.oHealCards;
-        myState.oAttackCards = newState.oAttackCards ? newState.oAttackCards : state.oAttackCards;
-        myState.oBlockCards = newState.oBlockCards ? newState.oBlockCards : state.oBlockCards;
+        myState.oMaxLife = newState.oMaxLife || newState.oMaxLife === 0 ? newState.oMaxLife : state.oMaxLife;
+        myState.oLife = newState.oLife || newState.oLife === 0 ? newState.oLife : state.oLife;
+        myState.oHealCards = newState.oHealCards || newState.oHealCards === 0 ? newState.oHealCards : state.oHealCards;
+        myState.oAttackCards = newState.oAttackCards || newState.oAttackCards === 0 ? newState.oAttackCards : state.oAttackCards;
+        myState.oBlockCards = newState.oBlockCards || newState.oBlockCards === 0 ? newState.oBlockCards : state.oBlockCards;
         return myState;
     }
 
     cardAgainstCard(cCardStats, cRoundDamage, cCardType, cValue, oCardStats, oRoundDamage, oCardType, oValue, state, i){
-
         switch (true) {
             case (cCardType === oCardType):
 				switch (cCardType) {
-					case 0:
-                        return [ this.doubbleHeal(
-                                this.heal( state.cLife, cValue, state.cMaxLife),
-                                this.heal( state.oLife, oValue, state.oMaxLife), state),
-                            null ];
-					case 1:
-                        return [ this.doubbleAttack(
-                                this.attack( state.cLife, (oValue / 2)),
-                                this.attack( state.oLife, (cValue / 2)), state),
-                            null ];
-					case 2:
-                        return [this.doubbleBlock(state), null];
+					case 0: // challanger heal opponent heal
+                        return [abilityCalculator.doubbleHeal(
+                            state.cLife, cValue, state.cMaxLife, state.cHealCards,
+                            state.oLife, oValue, state.oMaxLife, state.oHealCards),
+                        null];
+					case 1: // challanger attack opponent attack
+                        return [ abilityCalculator.doubbleAttack(
+                            state.cLife, cValue, state.cAttackCards, state.oLife,
+                            oValue, state.oAttackCards),
+                        null];
+					case 2: // challanger block opponent block
+                        return [abilityCalculator.doubbleBlock(state.cBlockCards, state.oBlockCards), null];
 				}
 			break;
-			case (cCardType === 0 && oCardType === 1):
-                let healAttack = this.healOnAttack(this.attack(state.cLife, oValue), state);
-                let cRD = cRoundDamage.splice(0);
+			case (cCardType === 0 && oCardType === 1): // challanger heal opponent block
+                let healAttack = abilityCalculator.healOnAttack(state.cLife, oValue, state.oAttackCards, state.cHealCards);
+                let cRD = cRoundDamage.slice(0);
                 cRD[i].type = unusedType;
-
                 return [healAttack, [
                     this.getRoundDamage(cCardStats, cRD[0].type, cRD[1].type, cRD[2].type),
                     null ]];
-            case ( cCardType === 1 && oCardType === 0):
-                let attackHeal = this.attackOnHeal(this.attack(state.oLife, cValue), state);
-                let oRD = oRoundDamage.splice(0);
-                oRD[i].tyoe = unusedType;
+            case ( cCardType === 1 && oCardType === 0): // challanger attack opponent heal
+                let attackHeal = abilityCalculator.attackOnHeal(state.oLife, cValue, state.oHealCards, state.cAttackCards);
+                let oRD = oRoundDamage.slice(0);
+                oRD[i].type = unusedType;
                 return [attackHeal, [
                     null,
                     this.getRoundDamage(oCardStats, oRD[0].type, oRD[1].type, oRD[2].type),
                 ]];
-			case (cCardType === 0 && oCardType === 2):
-                return [ this.healOnBlock(
-                        this.heal( state.cLife, cValue, state.cMaxLife), state),
+			case (cCardType === 0 && oCardType === 2): // challanger heal opponent block
+                return [ abilityCalculator.healOnBlock(
+                    state.cLife, cValue, state.cMaxLife, state.oBlockCards, state.cHealCards),
                     null ];
-            case ( cCardType === 2 && oCardType === 0):
-                return [ this.blockOnHeal(
-                        this.heal(state.olife, oValue, state.oMaxLife), state),
+            case ( cCardType === 2 && oCardType === 0): // challanger block opponent heal
+                return [ abilityCalculator.blockOnHeal(
+                    state.oLife, oValue, state.oMaxLife, state.oHealCards, state.cBlockCards),
                     null ];
-			case (cCardType === 1 && oCardType === 2):
-                return [ this.attackOnBlock(
-                        this.block(state.oLife, cValue, oValue), state),
-                    null ];
-            case (cCardType === 2 && oCardType === 1):
-                return [ this.blockOnAttack(
-                        this.block(state.cLife, oValue, cValue), state),
-                    null ];
+			case (cCardType === 1 && oCardType === 2): // challanger attack, opponent block
+                    return [abilityCalculator.attackOnBlock(
+                        cValue, state.oLife, oValue, state.cAttackCards, state.oBlockCards),
+                    null];
+            case (cCardType === 2 && oCardType === 1): // challanger block, opponent attack
+                    return [abilityCalculator.blockOnAttack(
+                        oValue, state.cLife, cValue, state.oBlockCards, state.cAttackCards),
+                    null];
         }
-    }
-
-    healOnAttack(life, state){
-        return {
-            cHealCards: (state.cHealCards -1),
-            cLife: life,
-
-            oAttackCards: (state.oAttackCards -1)
-        };
-    }
-
-    attackOnHeal(life, state){
-        return {
-            cAttackCards: (state.cAttackCards -1),
-
-            oHealCards: (state.oHealCards -1),
-            oLife: life
-        };
-    }
-
-    blockOnHeal(life, state){
-        return {
-            cBlockCards: (state.cBlockCards -1),
-
-            oHealCards: (state.oHealCards -1),
-            oLife: life
-        };
-    }
-
-    healOnBlock(life, state){
-        return {
-            oBlockCards: (state.oBlockCards -1),
-
-            cHealCards: (state.cHealCards -1),
-            cLife: life
-        };
-    }
-
-    attackOnBlock(life, state){
-        return {
-            cAttackCards: (state.cAttackCards -1),
-            oBlockCards: (state.oBlockCards -1),
-            oLife: life
-        };
-    }
-
-    blockOnAttack(life, state){
-        return {
-            oAttackCards: (state.oAttackCards -1),
-            cBlockCards: (state.cBlockCards -1),
-            cLife: life
-        };
-    }
-
-    doubbleBlock(state){
-        return {
-            cBlockCards: (state.cBlockCards -1),
-            oBlockCards: (state.oBlockCards -1)
-        };
-    }
-
-    block(life, attack, block){
-        return this.attack(life, (attack - block));
-    }
-
-    doubbleAttack(attackOne, attackTwo, state){
-        return {
-            cAttackCards: (state.cAttackCards -1),
-            cLife: attackOne,
-
-            oLife: attackTwo,
-            oAttackCards: (state.oAttackCards -1)
-        };
-    }
-
-    attack(life, value){
-        return (life - value) < 0 ? 0 : (life - value);
-    }
-
-    doubbleHeal(healOne, healTwo, state){
-        return {
-            cLife: healOne,
-            cHealCards: (state.cHealCards -1),
-
-            oLife: healTwo,
-            oHealCards: (state.oHealCards -1)
-        };
-    }
-
-    heal(life, value, max){
-        return (max - life) < value ? max : (life + value);
     }
 
     getTypeValue(stats, type, done){
