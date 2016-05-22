@@ -1,5 +1,5 @@
 'use strict';
-const User = require('./user.js');
+const User = require('./schemas/user.js');
 const co = require('co');
 
 /**

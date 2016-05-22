@@ -1,6 +1,6 @@
 'use strict';
 
-const GameRound = require('./gameRound.js');
+const GameRound = require('./schemas/gameRound.js');
 const co = require('co');
 
 const newRoundData = (cardPosOne, cardPosTwo, cardPosThree) =>

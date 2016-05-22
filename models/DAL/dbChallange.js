@@ -1,6 +1,6 @@
 'use strict';
 
-const Challange = require('./challange.js');
+const Challange = require('./schemas/challange.js');
 const co = require('co');
 
 /**

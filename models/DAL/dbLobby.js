@@ -1,6 +1,6 @@
 'use strict';
 
-const Lobby = require('./lobby.js');
+const Lobby = require('./schemas/lobby.js');
 const co = require('co');
 
 /**

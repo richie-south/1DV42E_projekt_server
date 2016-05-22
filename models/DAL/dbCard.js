@@ -1,6 +1,6 @@
 'use strict';
 
-const Card = require('./card.js');
+const Card = require('./schemas/card.js');
 const co = require('co');
 const Colors = require('../color.js');
 const colors = new Colors();
