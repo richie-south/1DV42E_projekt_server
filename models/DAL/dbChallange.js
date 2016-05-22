@@ -17,7 +17,7 @@ const newChallange = (challanger, challangerCard, opponent, opponentCard) =>
         challangerCard,
         opponent,
         opponentCard
-    }); 
+    });
 
 /**
  * [retrives callange object from id]
@@ -52,6 +52,28 @@ const getChallangeByIdLean = (id) =>
         .lean()
         .exec();
 
+const updateChallangeProps = (id, props) =>
+    new Promise((resolve, reject) => {
+        co(function* (){
+            //const challange = yield getChallangeByIdNoPopulate(id);
+            return Challange.update({ _id: id }, {
+                'challangerProps.healCards': Number(props.cHealCards),
+                'challangerProps.attackCards': Number(props.cAttackCards),
+                'challangerProps.blockCards': Number(props.cBlockCards),
+                'challangerProps.maxLife': Number(props.cMaxLife),
+                'challangerProps.life': Number(props.cLife),
+
+                'opponentProps.healCards': Number(props.oHealCards),
+                'opponentProps.attackCards': Number(props.oAttackCards),
+                'opponentProps.blockCards': Number(props.oBlockCards),
+                'opponentProps.maxLife': Number(props.oMaxLife),
+                'opponentProps.life': Number(props.oLife)
+            }).exec();
+        })
+        .then(doc => resolve(doc))
+        .catch(e => reject(e));
+    });
+
 const getAllChallanges = () => Challange.find({});
 
 module.exports = {
@@ -59,5 +81,6 @@ module.exports = {
     getChallangeById,
     getChallangeByIdLean,
     getChallangeByIdNoPopulate,
-    getAllChallanges
+    getAllChallanges,
+    updateChallangeProps
 };
