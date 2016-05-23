@@ -1,5 +1,7 @@
 'use strict';
 
+const compose = (a, b) => (c) => a(b(c));
+
 const devide = (a, b) => a / b;
 const devideByTwo = (a) => devide(a, 2);
 
@@ -161,22 +163,54 @@ const composeAttackAndHeal = (a, b, healCards, attackCards, lifeProp) => (life, 
 const healOnAttack = composeAttackAndHeal(attack, subtractOne, 'cHealCards', 'oAttackCards', 'cLife');
 const attackOnHeal = composeAttackAndHeal(attack, subtractOne, 'oHealCards', 'cAttackCards', 'oLife');
 
+/**
+ * [throws error if not number]
+ * @param  {[number]} a [any value]
+ * @return {[number]}   [same number]
+ */
+const isNumber = (a) => {
+    if(typeof a !== 'number'){ throw new TypeError('argument not number'); }
+    return a;
+};
+
+/**
+ * [checks if a is less than 0 , throws error if true]
+ * @param  {[number]} a [any value]
+ * @return {[number]}   [same number]
+ */
+const isZeroOrOver = (a) => {
+	if(a < 0){ throw new TypeError('number below zero'); }
+	return a;
+};
+
+const isNumberAndZeroOrOver = compose(isNumber, isZeroOrOver);
+
+/**
+ * [checks ]
+ * @param  {Function} fn      [function to call with arguments]
+ * @param  {[type]}   ...args [arguments in array]
+ * @return {[type]}           [fn results]
+ */
+const validate = (fn, ...args) => {
+	args.forEach(isNumberAndZeroOrOver);
+	return fn(...args);
+};
 
 module.exports = {
-    attack,
-    heal,
-    block,
+    attack: validate.bind(null, attack),
+    heal: validate.bind(null, heal),
+    block: validate.bind(null, block),
 
-    doubbleAttack,
-    doubbleHeal,
-    doubbleBlock,
+    doubbleAttack: validate.bind(null, doubbleAttack),
+    doubbleHeal: validate.bind(null, doubbleHeal),
+    doubbleBlock: validate.bind(null, doubbleBlock),
 
-    attackOnBlock,
-    blockOnAttack,
+    attackOnBlock: validate.bind(null, attackOnBlock),
+    blockOnAttack: validate.bind(null, blockOnAttack),
 
-    blockOnHeal,
-    healOnBlock,
+    blockOnHeal: validate.bind(null, blockOnHeal),
+    healOnBlock: validate.bind(null, healOnBlock),
 
-    attackOnHeal,
-    healOnAttack
+    attackOnHeal: validate.bind(null, attackOnHeal),
+    healOnAttack: validate.bind(null, healOnAttack)
 };
