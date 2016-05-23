@@ -178,12 +178,12 @@ const isNumber = (a) => {
  * @param  {[number]} a [any value]
  * @return {[number]}   [same number]
  */
-const isZeroOrOver = (a) => {
+const isOverZero = (a) => {
 	if(a < 0){ throw new TypeError('number below zero'); }
 	return a;
 };
 
-const isNumberAndZeroOrOver = compose(isNumber, isZeroOrOver);
+const isNumberAndOverZero = compose(isNumber, isOverZero);
 
 /**
  * [checks ]
@@ -192,7 +192,7 @@ const isNumberAndZeroOrOver = compose(isNumber, isZeroOrOver);
  * @return {[type]}           [fn results]
  */
 const validate = (fn, ...args) => {
-	args.forEach(isNumberAndZeroOrOver);
+	args.forEach(isNumberAndOverZero);
 	return fn(...args);
 };
 
