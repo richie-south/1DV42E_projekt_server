@@ -1,13 +1,8 @@
 'use strict';
 
-const color = class {
-    constructor() {
-        this.colors = ['#FF9800', '#4CAF50', '#00BCD4', '#2196F3', '#E91E63', '#9C27B0'];
-    }
+const colors = ['#FF9800', '#4CAF50', '#00BCD4', '#2196F3', '#E91E63', '#9C27B0'];
+const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
 
-    getRandomColor(){
-        return this.colors[Math.floor(Math.random() * this.colors.length)];
-    }
+module.exports = {
+    getRandomColor
 };
-
-module.exports = color;
