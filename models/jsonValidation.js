@@ -11,16 +11,11 @@ const joinValidation = (a) => {
     return true;
 };
 
-exports.joinValidation = joinValidation;
-
 const joinLobbyValidation = (a) => {
     if(!a.hasOwnProperty('room')) { return false; }
     if(!a.hasOwnProperty('fbId')) { return false; }
     return true;
 };
-
-exports.joinLobbyValidation = joinLobbyValidation;
-
 
 const testValidation = (a) => {
     if(!a.hasOwnProperty('test')) { return false; }
@@ -28,5 +23,8 @@ const testValidation = (a) => {
     return true;
 };
 
-
-exports.testValidation = testValidation;
+module.exports = {
+    joinValidation,
+    joinLobbyValidation,
+    testValidation
+};
