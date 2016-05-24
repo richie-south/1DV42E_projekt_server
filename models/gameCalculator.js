@@ -105,6 +105,20 @@ const getRounds = (cCardStats, cPosOneType, cPosTwoType, cPosThreeType,  oCardSt
     ];
 };
 
+/**
+ * [gets abillity values and decides what abbility function to run]
+ * @param  {[object]} cCardStats   [stats for challanger chard]
+ * @param  {[object]} cRoundDamage [holding value and type]
+ * @param  {[number]} cCardType    [type of card]
+ * @param  {[number]} cValue       [value of cRoundDamage]
+ * @param  {[object]} oCardStats   [stats for opponent card]
+ * @param  {[object]} oRoundDamage [holding value and type]
+ * @param  {[number]} oCardType    [type of card]
+ * @param  {[number]} oValue       [value of oRoundDamage]
+ * @param  {[object]} state        [full state of game]
+ * @param  {[number]} i            [iteration nr]
+ * @return {[object]}              [new state and posible new roundDamage]
+ */
 const cardAgainstCard = (cCardStats, cRoundDamage, cCardType, cValue, oCardStats, oRoundDamage, oCardType, oValue, state, i) => {
     switch (true) {
         case (cCardType === oCardType):
