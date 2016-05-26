@@ -3,8 +3,80 @@
 const chai = require('chai');
 const expect = require('chai').expect;
 const assert = require('chai').assert;
+
+const chaiHttp = require('chai-http');
+const server = require('./app');
+const should = chai.should();
+
+chai.use(chaiHttp);
+
 const aC = require('./models/abilityCalculator.js');
 const jsonV = require('./models/jsonValidation.js');
+
+describe('rest api', function () {
+    // get user
+    it('get undefinde user GET', function(done) {
+      chai.request('localhost:3334')
+        .get('/user/ingenanvandare')
+        .end(function(err, res){
+          res.should.have.status(404);
+          done();
+        });
+    });
+
+    it('get user GET', function(done) {
+      chai.request('localhost:3334')
+        .get('/user/10206232596794517')
+        .end(function(err, res){
+          res.should.have.status(200);
+          res.should.be.json;
+          res.body.should.be.a('object');
+          done();
+        });
+    });
+
+    // get user cards
+    it('get user cards GET', function(done) {
+      chai.request('localhost:3334')
+        .get('/user/cards/10206232596794517')
+        .end(function(err, res){
+          res.should.have.status(200);
+          res.should.be.json;
+          res.body.should.be.a('array');
+          done();
+        });
+    });
+
+    it('get undefinded user cards GET', function(done) {
+      chai.request('localhost:3334')
+        .get('/user/cards/ingenanvandare')
+        .end(function(err, res){
+          res.should.have.status(404);
+          done();
+        });
+    });
+
+    it('create user with unvalid json POST', function(done) {
+      chai.request('localhost:3334')
+        .post('/user/create')
+        .send({'fbId': 'notCreated', 'fbProfileImg': 'image', 'firstName': 'testUser'})
+        .end(function(err, res){
+            res.should.have.status(400);
+            done();
+        });
+    });
+
+    it('create user unvalid mongoose types POST', function(done) {
+      chai.request('localhost:3334')
+        .post('/user/create')
+        .send({'fbId': {}, 'fbProfileImg': '10', 'firstName': {}, 'lastName': '10'})
+        .end(function(err, res){
+          res.should.have.status(500);
+          done();
+        });
+    });
+
+});
 
 describe('abillity calculations', function () {
 
