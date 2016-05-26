@@ -1,10 +1,13 @@
 'use strict';
-// TODO: check up post validation
+
 const router = require('express').Router();
 const db = require('../models/DAL/dbDAL.js');
-const colors = require('colors');
 
-// create new user
+/**
+ * [creates new user]
+ * @param  {[route]} '/user/create' []
+ * @return {[object]}                [newly created user object]
+ */
 router.route('/user/create')
     .post((req, res) => {
 
@@ -20,36 +23,37 @@ router.route('/user/create')
             req.body.fbProfileImg,
             req.body.firstName,
             req.body.lastName)
+            .then(result => res.json(result))
+            .catch(e => res.status(500).send('500'));
+    });
+
+/**
+ * [get user by its fbId]
+ * @param  {[route]} '/user/:fbid' [id of a user]
+ * @return {[object]}         [object of user information]
+ */
+router.route('/user/:fbid')
+    .get((req, res) => {
+        db.dbUser.getAllUserDataByFbId(req.params.fbid)
             .then(result => {
-                console.log('created new user'.green);
-                console.log(result); // TODO: remove test log
+                if(!result){return res.status(404).send('404');}
                 res.json(result);
             })
             .catch(e => res.status(500).send('500'));
     });
 
-// get user
-router.route('/user/:fbid')
-    .get((req, res) => {
-        db.dbUser.getUserByFbId(req.params.fbid)
-            .then(result => res.json(result))
-            .catch(e => res.status(404).send('404'));
-    });
-
-// get user cards
+/**
+ * [get user cards by its fbId]
+ * @param  {[reoute]} '/user/cards/:fbid' [id of user]
+ * @return {[array]}   [array of object with user cards]
+ */
 router.route('/user/cards/:fbid')
     .get((req, res) => {
         db.getUserCardsByFbId(req.params.fbid)
-            .then(result => res.json(result))
-            .catch(e => res.status(404).send('404'));
-    });
-
-
-// remove this later
-router.route('/users')
-    .get((req, res) => {
-        db.getAllUsers()
-            .then(result => res.json(result))
+            .then(result => {
+                if(!result){return res.status(404).send('404');}
+                res.json(result);
+            })
             .catch(e => res.status(404).send('404'));
     });
 
