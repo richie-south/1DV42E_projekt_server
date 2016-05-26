@@ -254,9 +254,22 @@ const isGameOver = (roundResult, roundNr) => {
     return roundNr === maxNrOfRounds;
 };
 
+const isValidOptions = (challange, types, fbId) => {
+    let props;
+    if(challange.challanger.fbId === fbId){
+        props = challange.challangerProps;
+    }else{
+        props = challange.opponentProps;
+    }
+    let a = (props[dbStatsMap[types[0]]+'Cards'] - types[0]) > 0;
+    let b = (props[dbStatsMap[types[1]]+'Cards'] - types[1]) > 0;
+    let c = (props[dbStatsMap[types[2]]+'Cards'] - types[2]) > 0;
+    return a && b && c;
+};
 
 module.exports = {
     isGameOver,
+    isValidOptions,
     getRoundResult,
     getRounds,
     getLastItemInArray
