@@ -2,8 +2,8 @@
 
 const Card = require('./schemas/card.js');
 const co = require('co');
-const Colors = require('../color.js');
-const colors = new Colors();
+const colors = require('../color.js');
+
 /**
  * [crates new card model for mongodb]
  * @param  {[string]} creatorId [id of creator of card]
