@@ -4,8 +4,7 @@ const chai = require('chai');
 const expect = require('chai').expect;
 const assert = require('chai').assert;
 const aC = require('./models/abilityCalculator.js');
-
-
+const jsonV = require('./models/jsonValidation.js');
 
 describe('abillity calculations', function () {
 
@@ -139,5 +138,40 @@ describe('abillity calculations', function () {
 
     it('doubbleBlock values not number ', function(){
         assert.throws(aC.doubbleBlock.bind(null, 1, '2'), TypeError, 'argument not number');
+    });
+});
+
+describe('json validator', function () {
+    it('valid join Lobby Validation', function(){
+        expect(jsonV.joinLobbyValidation({room: '', fbId: ''})).to.equal(true);
+    });
+
+    it('invalid object join Lobby Validation', function(){
+        expect(jsonV.joinLobbyValidation({fbId: ''})).to.equal(false);
+    });
+
+    it('invalid object join Validation', function(){
+        expect(jsonV.joinValidation({
+            add: '',
+            card: {
+                _id: '',
+                name: '',
+                avatar: '',
+                stats: ''
+            }
+        })).to.equal(false);
+    });
+
+    it('valid object join Validation', function(){
+        expect(jsonV.joinValidation({
+            add: '',
+            card: {
+                _id: '',
+                name: '',
+                avatar: '',
+                stats: '',
+                _creator: ''
+            }
+        })).to.equal(true);
     });
 });
