@@ -30,6 +30,17 @@ const getUserByFbId = (fbId) =>
         .findOne({ fbId : fbId })
         .exec();
 
+const getAllUserDataByFbId = (fbId) =>
+    User
+        .findOne({ fbId : fbId })
+        .populate('cards')
+        .populate({
+        	path: 'cards',
+        	populate: { path:  'pastUsers',
+    		model: 'User' }
+      })
+        .exec();
+
 /**
  * [gets all users]
  * @return {[promise]} [all user objects]
@@ -60,5 +71,6 @@ module.exports = {
     createNewUser,
     getUserByFbId,
     getAllUsers,
-    getUserCardsIdByFbId
+    getUserCardsIdByFbId,
+    getAllUserDataByFbId
 };
