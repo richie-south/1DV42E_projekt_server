@@ -186,8 +186,8 @@ const isOverZero = (a) => {
 const isNumberAndOverZero = compose(isNumber, isOverZero);
 
 /**
- * [checks ]
- * @param  {Function} fn      [function to call with arguments]
+ * [checks if parameters sent to this functions are valid]
+ * @param  {Function} fn      [function to call with ...args]
  * @param  {[type]}   ...args [arguments in array]
  * @return {[type]}           [fn results]
  */
