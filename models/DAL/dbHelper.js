@@ -1,6 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const config = require('../../config/config.js');
 
 const initilize = () => {
     const db = mongoose.connection;
@@ -20,7 +21,7 @@ const initilize = () => {
         });
     });
 
-    mongoose.connect('mongodb://188.166.26.125/test');
+    mongoose.connect(config.mongoUrl);
 };
 
 module.exports = initilize;
