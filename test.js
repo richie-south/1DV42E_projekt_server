@@ -12,6 +12,7 @@ chai.use(chaiHttp);
 
 const aC = require('./models/abilityCalculator.js');
 const jsonV = require('./models/jsonValidation.js');
+const color = require('./models/color.js');
 
 describe('rest api', function () {
     // get user
@@ -76,6 +77,17 @@ describe('rest api', function () {
         });
     });
 
+});
+
+describe('color functions', function () {
+
+    it('color should be string', function(){
+        assert.isString(color.getRandomColor(), 'this is string');
+    });
+
+    it('color should include #', function(){
+        assert.include(color.getRandomColor(), '#');
+    });
 });
 
 describe('abillity calculations', function () {
