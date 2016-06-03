@@ -147,12 +147,14 @@ const sendCardFromUserToUser = (userAFbId, cardId, userBFbId) =>
             ];
             // gets userA cards
             const userACards = yield dbUser.getUserCardsIdByFbId(userA.fbId);
+            console.log(userACards);
             // checks if cardId belongs to userA
             const cardIdToSend = userACards.filter(card => {
-                if(card.toString() === cardId){
+                if(card.toString() === cardId.toString()){
                     return card;
                 }
             })[0];
+
             // valid cardId
             if(cardIdToSend === undefined || cardIdToSend === null){
                 throw 'cardId dont belong to user';
