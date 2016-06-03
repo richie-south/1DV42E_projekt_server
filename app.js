@@ -20,6 +20,7 @@ const Lobby = require('./socketRoutes/lobby.js');
 const Challange = require('./socketRoutes/challange.js');
 const config = require('./config/config.js');
 const validation = require('./models/jsonValidation.js');
+const router = require('express').Router();
 
 const app = express();
 const port = 3334;
@@ -32,7 +33,6 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(morgan('dev'));
 
-//app.use('/api', apiRoutes);
 app.use('/', require('./routes/user.js'));
 app.use('/', require('./routes/authenticate.js'));
 
