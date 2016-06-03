@@ -60,10 +60,13 @@ const getCardByCardIdLean = (id) =>
         .lean()
         .exec();
 
+const addXpToCard = (id, xp) => Card.update({ _id: id }, { 'stats.xp': xp }).exec();
+
 module.exports = {
     createNewCard,
     createNewCardSave,
     getAllCards,
     getCardByCardId,
-    getCardByCardIdLean
+    getCardByCardIdLean,
+    addXpToCard
 };
