@@ -1,4 +1,5 @@
 'use strict';
+// TODO: refactor all of this shity code
 
 const abilityCalculator = require('./abilityCalculator.js');
 const unusedType = 10;
@@ -61,18 +62,17 @@ const updateState = (state, newState) => {
  * @param  {[bool]}   nextTypeValue [description]
  * @return {[number]}                 [value or abillity]
  */
-const getTypeValue = (stats, types, done, nextTypeValue) =>
-    (pos) => {
-		if(types[pos] === unusedType){ return 0; }
-		if(nextTypeValue && types[pos] === 1){
-			if(done){ nextTypeValue = false; }
-			return (stats[dbStatsMap[types[pos]]] + stats.attackBoost);
-		}
-		if(types[pos] === 0){ nextTypeValue = true; }
-		if(done){ nextTypeValue = false; }
+const getTypeValue = (stats, types, done, nextTypeValue) => (pos) => {
+	if(types[pos] === unusedType){ return 0; }
+	if(nextTypeValue && types[pos] === 1){
+		if(done){ nextTypeValue = false; } // unused?
+		return (stats[dbStatsMap[types[pos]]] + stats.attackBoost);
+	}
+	if(types[pos] === 0){ nextTypeValue = true; }
+	if(done){ nextTypeValue = false; } // unused?
 
-		return stats[dbStatsMap[types[pos]]];
-	};
+	return stats[dbStatsMap[types[pos]]];
+};
 
 /**
  * [makes a map of type of abillity and its value]
@@ -84,8 +84,7 @@ const getTypeValue = (stats, types, done, nextTypeValue) =>
  */
 const getRoundDamage = (cardStats, posOneType, posTwoType, posThreeType) => {
     let typeValue = getTypeValue(cardStats, [posOneType, posTwoType, posThreeType], false, false);
-    return [
-        {
+    return [{
             type: posOneType,
             value: typeValue(0)
         }, {
@@ -94,8 +93,7 @@ const getRoundDamage = (cardStats, posOneType, posTwoType, posThreeType) => {
         }, {
             type: posThreeType,
             value: typeValue(2)
-        }
-    ];
+        }];
 };
 
 const getRounds = (cCardStats, cPosOneType, cPosTwoType, cPosThreeType,  oCardStats, oPosOneType, oPosTwoType, oPosThreeType) => {
@@ -267,10 +265,33 @@ const isValidOptions = (challange, types, fbId) => {
     return a && b && c;
 };
 
+const calculateXpGain = (maxLife, currentLife, oldXp) => {
+    return (maxLife - currentLife) + oldXp;
+};
+
 module.exports = {
     isGameOver,
     isValidOptions,
     getRoundResult,
     getRounds,
-    getLastItemInArray
+    getLastItemInArray,
+    calculateXpGain
+};
+
+
+const mapFunctionInArray = (a) => (...args) => args.map(a);
+const getLastItemInArrays = mapFunctionInArray(getLastItemInArray);
+
+const program = () => {
+
+
+    // const step1 =
+    //const [cRound, oRound] = getLastItemInArrays(c, o);
+    //
+    //const cRoundDamage = getRoundDamage()
+    //const oRoundDamage = getRoundDamage()
+    //
+    //let gameSate = getInitialGameState();
+    //
+    //return calculateRoundResult();
 };
