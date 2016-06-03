@@ -53,28 +53,23 @@ const getChallangeByIdLean = (id) =>
         .exec();
 
 const updateChallangeProps = (id, props) =>
-    new Promise((resolve, reject) => {
-        co(function* (){
-            //const challange = yield getChallangeByIdNoPopulate(id);
-            return Challange.update({ _id: id }, {
-                'challangerProps.healCards': Number(props.cHealCards),
-                'challangerProps.attackCards': Number(props.cAttackCards),
-                'challangerProps.blockCards': Number(props.cBlockCards),
-                'challangerProps.maxLife': Number(props.cMaxLife),
-                'challangerProps.life': Number(props.cLife),
+    Challange.update({ _id: id }, {
+        'challangerProps.healCards': Number(props.cHealCards),
+        'challangerProps.attackCards': Number(props.cAttackCards),
+        'challangerProps.blockCards': Number(props.cBlockCards),
+        'challangerProps.maxLife': Number(props.cMaxLife),
+        'challangerProps.life': Number(props.cLife),
 
-                'opponentProps.healCards': Number(props.oHealCards),
-                'opponentProps.attackCards': Number(props.oAttackCards),
-                'opponentProps.blockCards': Number(props.oBlockCards),
-                'opponentProps.maxLife': Number(props.oMaxLife),
-                'opponentProps.life': Number(props.oLife)
-            }).exec();
-        })
-        .then(doc => resolve(doc))
-        .catch(e => reject(e));
-    });
+        'opponentProps.healCards': Number(props.oHealCards),
+        'opponentProps.attackCards': Number(props.oAttackCards),
+        'opponentProps.blockCards': Number(props.oBlockCards),
+        'opponentProps.maxLife': Number(props.oMaxLife),
+        'opponentProps.life': Number(props.oLife)})
+        .exec();
 
 const getAllChallanges = () => Challange.find({});
+
+const getCardsInChallange = (id) => Challange.findOne({_id: id}, 'challangerCard opponentCard');
 
 module.exports = {
     newChallange,
@@ -82,5 +77,6 @@ module.exports = {
     getChallangeByIdLean,
     getChallangeByIdNoPopulate,
     getAllChallanges,
-    updateChallangeProps
+    updateChallangeProps,
+    getCardsInChallange
 };
