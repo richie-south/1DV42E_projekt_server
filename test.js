@@ -13,6 +13,11 @@ chai.use(chaiHttp);
 const aC = require('./models/abilityCalculator.js');
 const jsonV = require('./models/jsonValidation.js');
 const color = require('./models/color.js');
+//const gameCal = require('./models/gameCalculator.js');
+const gameCal = require('./models/test.js');
+const updateObject = require('./models/updateObject.js');
+
+
 
 describe('rest api', function () {
     // get user
@@ -88,6 +93,26 @@ describe('color functions', function () {
     it('color should include #', function(){
         assert.include(color.getRandomColor(), '#');
     });
+});
+
+describe('game calculator', function () {
+    it('round damage', function(){
+        expect(gameCal.getRoundDamage({heal: 20, block: 30, attack: 40}, 1, 2, 0)).to.eql([
+            { type: 1, value: 40 },
+            { type: 2, value: 30 },
+            { type: 0, value: 20 }
+        ]);
+    });
+
+
+});
+
+describe('updateObject.js', function () {
+    it('a === 1, b === 99', function(){
+        expect(updateObject.updateObjectProps({a: 'aa', b: 99}, { a: 1 })).to.eql({ a: 1, b: 99 });
+    });
+
+
 });
 
 describe('abillity calculations', function () {

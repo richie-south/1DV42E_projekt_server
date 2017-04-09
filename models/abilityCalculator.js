@@ -1,5 +1,8 @@
 'use strict';
 
+const validation = require('./validation.js');
+const validate = validation.validateIsNumberAndOverZero;
+
 const compose = (a, b) => (c) => a(b(c));
 
 const devide = (a, b) => a / b;
@@ -162,39 +165,6 @@ const composeAttackAndHeal = (a, b, healCards, attackCards, lifeProp) => (life, 
 
 const healOnAttack = composeAttackAndHeal(attack, subtractOne, 'cHealCards', 'oAttackCards', 'cLife');
 const attackOnHeal = composeAttackAndHeal(attack, subtractOne, 'oHealCards', 'cAttackCards', 'oLife');
-
-/**
- * [throws error if not number]
- * @param  {[number]} a [any value]
- * @return {[number]}   [same number]
- */
-const isNumber = (a) => {
-    if(typeof a !== 'number'){ throw new TypeError('argument not number'); }
-    return a;
-};
-
-/**
- * [checks if a is less than 0 , throws error if true]
- * @param  {[number]} a [any value]
- * @return {[number]}   [same number]
- */
-const isOverZero = (a) => {
-	if(a < 0){ throw new TypeError('number below zero'); }
-	return a;
-};
-
-const isNumberAndOverZero = compose(isNumber, isOverZero);
-
-/**
- * [checks if parameters sent to this functions are valid]
- * @param  {Function} fn      [function to call with ...args]
- * @param  {[type]}   ...args [arguments in array]
- * @return {[type]}           [fn results]
- */
-const validate = (fn, ...args) => {
-	args.forEach(isNumberAndOverZero);
-	return fn(...args);
-};
 
 module.exports = {
     attack: validate.bind(null, attack),
